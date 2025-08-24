@@ -20,9 +20,6 @@ export default function AboutPage() {
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge variant="secondary" className="mb-6">
-              {t("about.badge")}
-            </Badge>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-foreground mb-6">{t("about.title")}</h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">{t("about.subtitle")}</p>
           </div>

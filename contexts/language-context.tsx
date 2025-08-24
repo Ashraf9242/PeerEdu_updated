@@ -86,7 +86,6 @@ const translations = {
     "login.signup": "Don't have an account? Sign up here",
 
     // Register Page
-    "register.badge": "Join PeerEdu",
     "register.title": "Create Account",
     "register.subtitle": "Start your peer learning journey today",
     "register.form.title": "Sign up for PeerEdu",
@@ -264,7 +263,6 @@ const translations = {
     "login.signup": "ليس لديك حساب؟ أنشئ حساباً هنا",
 
     // Register Page
-    "register.badge": "انضم إلى بير إيدو",
     "register.title": "إنشاء حساب",
     "register.subtitle": "ابدأ رحلة التعلم بين الأقران اليوم",
     "register.form.title": "التسجيل في بير إيدو",
@@ -302,7 +300,6 @@ const translations = {
     "register.university.other": "أخرى",
 
     // About Page
-    "about.badge": "حول بير إيدو",
     "about.title": "تمكين الطلاب من خلال التعلم بين الأقران",
     "about.subtitle":
       "تأسست بالإيمان أن أفضل تعلم يحدث عندما يعلم الطلاب الطلاب، بير إيدو تثور التعليم في عُمان من خلال إنشاء روابط معنوية بين طلاب الجامعات.",

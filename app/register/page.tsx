@@ -27,9 +27,7 @@ export default function RegisterPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
-              <Badge variant="secondary" className="mb-4">
-                {t("register.badge")}
-              </Badge>
+              
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{t("register.title")}</h1>
               <p className="text-muted-foreground">{t("register.subtitle")}</p>
             </div>
