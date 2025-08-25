@@ -5,14 +5,14 @@ import type React from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff, Mail, Lock, User, GraduationCap } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone, Upload } from "lucide-react"
 import { useState } from "react"
 import { useLanguage } from "@/contexts/language-context"
 
@@ -33,11 +33,7 @@ export default function RegisterPage() {
             </div>
 
             <Card className="p-6">
-              <CardHeader className="space-y-1 pb-6">
-                <CardTitle className="text-2xl font-serif">{t("register.form.title")}</CardTitle>
-                <CardDescription>{t("register.form.description")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-0">
                 <RegisterForm />
               </CardContent>
             </Card>
@@ -59,15 +55,18 @@ function RegisterForm() {
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
+    role: "student",
     firstName: "",
-    lastName: "",
+    middleName: "",
+    familyName: "",
+    phone: "+968",
     email: "",
+    university: "",
+    yearOfStudy: "",
     password: "",
     confirmPassword: "",
-    university: "",
-    major: "",
-    accountType: "",
     agreeToTerms: false,
   })
 
@@ -75,15 +74,52 @@ function RegisterForm() {
     e.preventDefault()
     // Handle registration logic here
     console.log("Registration attempt:", formData)
+    console.log("Selected file:", selectedFile)
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
+  }
+
+  const containerClass =
+    formData.role === "student"
+      ? "rounded-xl p-6 bg-card/60 border border-border/60 shadow-sm backdrop-blur-sm"
+      : "rounded-xl p-6 bg-accent text-accent-foreground border border-accent/40 shadow-sm"
+
   return (
+    <div className={containerClass}>
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      {/* Role Switch */}
+      <div className="space-y-2">
+        <Label htmlFor="role">{t("register.role.title")}</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            className={formData.role === "student" ? "bg-white/80 text-foreground hover:bg-white" : "bg-muted text-foreground"}
+            variant={formData.role === "student" ? "default" : "secondary"}
+            onClick={() => handleInputChange("role", "student")}
+          >
+            {t("register.role.student")}
+          </Button>
+          <Button
+            type="button"
+            className={formData.role === "teacher" ? "bg-foreground text-background hover:bg-foreground/90" : "bg-muted text-foreground"}
+            variant={formData.role === "teacher" ? "default" : "secondary"}
+            onClick={() => handleInputChange("role", "teacher")}
+          >
+            {t("register.role.teacher")}
+          </Button>
+        </div>
+      </div>
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">{t("register.firstName")}</Label>
           <div className="relative">
@@ -94,25 +130,57 @@ function RegisterForm() {
               placeholder={t("register.placeholder.firstName")}
               value={formData.firstName}
               onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-background"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="lastName">{t("register.lastName")}</Label>
+          <Label htmlFor="middleName">{t("register.middleName")}</Label>
           <Input
-            id="lastName"
+            id="middleName"
             type="text"
-            placeholder={t("register.placeholder.lastName")}
-            value={formData.lastName}
-            onChange={(e) => handleInputChange("lastName", e.target.value)}
+            placeholder={t("register.placeholder.middleName")}
+            value={formData.middleName}
+            onChange={(e) => handleInputChange("middleName", e.target.value)}
+            className="bg-background"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="familyName">{t("register.familyName")}</Label>
+          <Input
+            id="familyName"
+            type="text"
+            placeholder={t("register.placeholder.familyName")}
+            value={formData.familyName}
+            onChange={(e) => handleInputChange("familyName", e.target.value)}
+            className="bg-background"
             required
           />
         </div>
       </div>
 
+      {/* Phone Number */}
+      <div className="space-y-2">
+        <Label htmlFor="phone">{t("register.phone")}</Label>
+        <div className="relative">
+          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="phone"
+            type="tel"
+            placeholder={t("register.placeholder.phone")}
+            value={formData.phone}
+            onChange={(e) => handleInputChange("phone", e.target.value)}
+            className="pl-10 bg-background"
+            required
+          />
+        </div>
+      </div>
+
+      {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="email">{t("register.email")}</Label>
         <div className="relative">
@@ -123,58 +191,66 @@ function RegisterForm() {
             placeholder={t("register.placeholder.email")}
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-background"
             required
           />
         </div>
       </div>
 
+      {/* University Selection */}
       <div className="space-y-2">
         <Label htmlFor="university">{t("register.university")}</Label>
         <div className="relative">
           <GraduationCap className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Select onValueChange={(value) => handleInputChange("university", value)}>
-            <SelectTrigger className="pl-10">
+            <SelectTrigger className="pl-10 bg-background">
               <SelectValue placeholder={t("register.placeholder.university")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="utas-ibri">{t("register.university.utas")}</SelectItem>
-              <SelectItem value="squ">{t("register.university.squ")}</SelectItem>
-              <SelectItem value="german-university">{t("register.university.german")}</SelectItem>
-              <SelectItem value="nizwa-university">{t("register.university.nizwa")}</SelectItem>
-              <SelectItem value="dhofar-university">{t("register.university.dhofar")}</SelectItem>
-              <SelectItem value="other">{t("register.university.other")}</SelectItem>
+              {[
+                { value: "squ", label: t("register.university.squ") },
+                { value: "dhofar-university", label: t("register.university.dhofar") },
+                { value: "german-university", label: t("register.university.german") },
+                { value: "muscat-university", label: t("register.university.muscat") },
+                { value: "nizwa-university", label: t("register.university.nizwa") },
+                { value: "oman-university", label: t("register.university.oman") },
+                { value: "utas-ibri", label: t("register.university.utas.ibri") },
+                { value: "utas-muscat", label: t("register.university.utas.muscat") },
+                { value: "utas-nizwa", label: t("register.university.utas.nizwa") },
+                { value: "utas-salalah", label: t("register.university.utas.salalah") },
+                { value: "utas-sohar", label: t("register.university.utas.sohar") },
+              ]
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
       </div>
 
+      {/* Year of Study */}
       <div className="space-y-2">
-        <Label htmlFor="major">{t("register.major")}</Label>
-        <Input
-          id="major"
-          type="text"
-          placeholder={t("register.placeholder.major")}
-          value={formData.major}
-          onChange={(e) => handleInputChange("major", e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="accountType">{t("register.accountType")}</Label>
-        <Select onValueChange={(value) => handleInputChange("accountType", value)}>
-          <SelectTrigger>
-            <SelectValue placeholder={t("register.placeholder.accountType")} />
+        <Label htmlFor="yearOfStudy">{t("register.yearOfStudy")}</Label>
+        <Select onValueChange={(value) => handleInputChange("yearOfStudy", value)}>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder={t("register.placeholder.yearOfStudy")} />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="student">{t("register.option.student")}</SelectItem>
-            <SelectItem value="tutor">{t("register.option.tutor")}</SelectItem>
-            <SelectItem value="both">{t("register.option.both")}</SelectItem>
-          </SelectContent>
+                     <SelectContent>
+             <SelectItem value="foundation1">{t("register.year.foundation1")}</SelectItem>
+             <SelectItem value="foundation2">{t("register.year.foundation2")}</SelectItem>
+             <SelectItem value="foundation3">{t("register.year.foundation3")}</SelectItem>
+             <SelectItem value="foundation4">{t("register.year.foundation4")}</SelectItem>
+             <SelectItem value="study1">{t("register.year.study1")}</SelectItem>
+             <SelectItem value="study2">{t("register.year.study2")}</SelectItem>
+             <SelectItem value="study3">{t("register.year.study3")}</SelectItem>
+             <SelectItem value="study4">{t("register.year.study4")}</SelectItem>
+             <SelectItem value="graduate">{t("register.year.graduate")}</SelectItem>
+           </SelectContent>
         </Select>
       </div>
 
+      {/* Password */}
       <div className="space-y-2">
         <Label htmlFor="password">{t("register.password")}</Label>
         <div className="relative">
@@ -185,7 +261,7 @@ function RegisterForm() {
             placeholder={t("register.placeholder.password")}
             value={formData.password}
             onChange={(e) => handleInputChange("password", e.target.value)}
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 bg-background"
             required
           />
           <Button
@@ -200,6 +276,7 @@ function RegisterForm() {
         </div>
       </div>
 
+      {/* Confirm Password */}
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">{t("register.confirmPassword")}</Label>
         <div className="relative">
@@ -210,7 +287,7 @@ function RegisterForm() {
             placeholder={t("register.placeholder.confirmPassword")}
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 bg-background"
             required
           />
           <Button
@@ -225,6 +302,28 @@ function RegisterForm() {
         </div>
       </div>
 
+      {/* File Upload */}
+      <div className="space-y-2">
+        <Label htmlFor="uploadId">{t("register.uploadId")}</Label>
+        <div className="relative">
+          <Upload className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="uploadId"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            onChange={handleFileChange}
+            className="pl-10 bg-background file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+            required
+          />
+        </div>
+        {selectedFile && (
+          <p className="text-sm text-muted-foreground">
+            Selected: {selectedFile.name}
+          </p>
+        )}
+      </div>
+
+      {/* Terms and Conditions */}
       <div className="flex items-center space-x-2">
         <Checkbox
           id="terms"
@@ -236,48 +335,13 @@ function RegisterForm() {
         </Label>
       </div>
 
+      {/* Submit Button */}
       <Button type="submit" className="w-full" size="lg" disabled={!formData.agreeToTerms}>
         {t("register.submit")}
       </Button>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">{t("register.continue")}</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Button variant="outline" type="button">
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              fill="#4285F4"
-            />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#34A853"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#EA4335"
-            />
-          </svg>
-          {t("register.google")}
-        </Button>
-        <Button variant="outline" type="button">
-          <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-          </svg>
-          {t("register.twitter")}
-        </Button>
-      </div>
+      
     </form>
+    </div>
   )
 }
