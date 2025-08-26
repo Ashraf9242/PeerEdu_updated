@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone, Upload } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 import { useLanguage } from "@/contexts/language-context"
 
@@ -39,7 +40,12 @@ export default function RegisterPage() {
             </Card>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">{t("register.signin")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("register.signin").split("?")[0]}?{" "}
+                <Link href="/login" className="text-primary hover:underline font-medium">
+                  {t("register.signin").includes("Sign in here") ? "Sign in here" : "سجل دخولك هنا"}
+                </Link>
+              </p>
             </div>
           </div>
         </div>

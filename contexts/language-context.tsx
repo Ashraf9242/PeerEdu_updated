@@ -102,7 +102,7 @@ const translations = {
     "register.yearOfStudy": "Year of Study",
     "register.password": "Password",
     "register.confirmPassword": "Confirm Password",
-    "register.uploadId": "Upload Student ID or Document",
+    "register.uploadId": "Upload Student ID ",
     "register.terms": "I agree to the Terms of Service and Privacy Policy",
     "register.submit": "Register",
     "register.signin": "Already have an account? Sign in here",
@@ -200,6 +200,7 @@ const translations = {
 
     // Footer
     "footer.contact": "Contact Us",
+    "footer.description": "Connecting university students for peer-to-peer learning and academic excellence.",
     "footer.support": "Support",
     "footer.faq": "FAQ",
     "footer.policy": "Privacy Policy",
@@ -297,7 +298,7 @@ const translations = {
     "register.yearOfStudy": "سنة الدراسة",
     "register.password": "كلمة المرور",
     "register.confirmPassword": "تأكيد كلمة المرور",
-    "register.uploadId": "رفع هوية الطالب أو وثيقة",
+    "register.uploadId": "رفع هوية الطالب",
     "register.terms": "أوافق على شروط الخدمة وسياسة الخصوصية",
     "register.submit": "تسجيل",
     "register.signin": "لديك حساب بالفعل؟ سجل دخولك هنا",
@@ -393,6 +394,7 @@ const translations = {
 
     // Footer
     "footer.contact": "اتصل بنا",
+    "footer.description": "ربط طلاب الجامعات للتعلم بين الأقران والتميز الأكاديمي.",
     "footer.support": "الدعم",
     "footer.faq": "الأسئلة الشائعة",
     "footer.policy": "سياسة الخصوصية",

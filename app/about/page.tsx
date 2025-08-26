@@ -5,12 +5,15 @@ import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { GraduationCap, Users, BookOpen, Target, Eye, Heart, Award, Clock, Shield, TrendingUp } from "lucide-react"
+import { GraduationCap, Users, BookOpen, Target, Eye, Heart, Award, Clock, Shield, TrendingUp, X } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+import { useState } from "react"
 import { useLanguage } from "@/contexts/language-context"
 
 export default function AboutPage() {
   const { t } = useLanguage()
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,10 +42,22 @@ export default function AboutPage() {
 
             <Card className="p-8 md:p-12">
               <CardContent className="pt-6">
-                <div className="prose prose-lg max-w-none text-muted-foreground">
-                  <p className="mb-6">{t("about.story.p1")}</p>
-                  <p className="mb-6">{t("about.story.p2")}</p>
-                  <p>{t("about.story.p3")}</p>
+                                 <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
+                   <div className="flex-shrink-0">
+                     <Image
+                       src="/images/peeredu-logo.png"
+                       alt="PeerEdu Logo"
+                       width={180}
+                       height={180}
+                       className="rounded-lg cursor-pointer hover:scale-105 transition-transform duration-200"
+                       onClick={() => setSelectedImage("/images/peeredu-logo.png")}
+                     />
+                   </div>
+                  <div className="prose prose-lg max-w-none text-muted-foreground">
+                    <p className="mb-6">{t("about.story.p1")}</p>
+                    <p className="mb-6">{t("about.story.p2")}</p>
+                    <p>{t("about.story.p3")}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -185,10 +200,17 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <Card className="p-8 md:p-12">
               <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="w-40 h-40 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="h-20 w-20 text-primary" />
-                  </div>
+                                 <div className="flex flex-col md:flex-row items-center gap-8">
+                   <div className="flex-shrink-0">
+                     <Image
+                       src="/images/Mohammadasrafali.png"
+                       alt="Mohammed Ashraf - CEO"
+                       width={160}
+                       height={160}
+                       className="rounded-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                       onClick={() => setSelectedImage("/images/Mohammadasrafali.png")}
+                     />
+                   </div>
                   <div className="text-center md:text-left">
                     <h3 className="font-serif text-3xl font-bold mb-2">{t("ceo.name")}</h3>
                     <p className="text-primary font-medium text-lg mb-4">{t("ceo.position")}</p>
@@ -247,10 +269,38 @@ export default function AboutPage() {
               <Link href="/">{t("about.join.back")}</Link>
             </Button>
           </div>
-        </div>
-      </section>
+                 </div>
+       </section>
 
-      <Footer />
-    </div>
-  )
-}
+                               {/* Image Modal */}
+         {selectedImage && (
+           <div 
+             className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+             onClick={() => setSelectedImage(null)}
+           >
+             <div className="relative max-w-2xl max-h-full">
+               <button
+                 onClick={(e) => {
+                   e.stopPropagation()
+                   setSelectedImage(null)
+                 }}
+                 className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+               >
+                 <X className="h-8 w-8" />
+               </button>
+               <Image
+                 src={selectedImage}
+                 alt="Full size image"
+                 width={600}
+                 height={600}
+                 className="max-w-full max-h-full object-contain rounded-lg"
+                 onClick={(e) => e.stopPropagation()}
+               />
+             </div>
+           </div>
+         )}
+
+       <Footer />
+     </div>
+   )
+ }
