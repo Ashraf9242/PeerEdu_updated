@@ -16,6 +16,7 @@ import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone, Upload } from "luc
 import Link from "next/link"
 import { useState } from "react"
 import { useLanguage } from "@/contexts/language-context"
+import { z } from "zod"
 
 export default function RegisterPage() {
   const { t } = useLanguage()
@@ -41,9 +42,9 @@ export default function RegisterPage() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                {t("register.signin").split("?")[0]}?{" "}
+                {t("register.signin.prefix")}? {" "}
                 <Link href="/login" className="text-primary hover:underline font-medium">
-                  {t("register.signin").includes("Sign in here") ? "Sign in here" : "سجل دخولك هنا"}
+                  {t("register.signin.link")}
                 </Link>
               </p>
             </div>
@@ -76,11 +77,23 @@ function RegisterForm() {
     agreeToTerms: false,
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle registration logic here
-    console.log("Registration attempt:", formData)
-    console.log("Selected file:", selectedFile)
+    const payload = { ...formData }
+    try {
+      const resp = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!resp.ok) {
+        console.error("Register failed", await resp.json())
+        return
+      }
+      window.location.href = "/login"
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -128,18 +141,15 @@ function RegisterForm() {
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">{t("register.firstName")}</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="firstName"
-              type="text"
-              placeholder={t("register.placeholder.firstName")}
-              value={formData.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className="pl-10 bg-background"
-              required
-            />
-          </div>
+          <Input
+            id="firstName"
+            type="text"
+            placeholder={t("register.placeholder.firstName")}
+            value={formData.firstName}
+            onChange={(e) => handleInputChange("firstName", e.target.value)}
+            className="bg-background"
+            required
+          />
         </div>
 
         <div className="space-y-2">
@@ -151,7 +161,6 @@ function RegisterForm() {
             value={formData.middleName}
             onChange={(e) => handleInputChange("middleName", e.target.value)}
             className="bg-background"
-            required
           />
         </div>
 
@@ -242,17 +251,17 @@ function RegisterForm() {
           <SelectTrigger className="bg-background">
             <SelectValue placeholder={t("register.placeholder.yearOfStudy")} />
           </SelectTrigger>
-                     <SelectContent>
-             <SelectItem value="foundation1">{t("register.year.foundation1")}</SelectItem>
-             <SelectItem value="foundation2">{t("register.year.foundation2")}</SelectItem>
-             <SelectItem value="foundation3">{t("register.year.foundation3")}</SelectItem>
-             <SelectItem value="foundation4">{t("register.year.foundation4")}</SelectItem>
-             <SelectItem value="study1">{t("register.year.study1")}</SelectItem>
-             <SelectItem value="study2">{t("register.year.study2")}</SelectItem>
-             <SelectItem value="study3">{t("register.year.study3")}</SelectItem>
-             <SelectItem value="study4">{t("register.year.study4")}</SelectItem>
-             <SelectItem value="graduate">{t("register.year.graduate")}</SelectItem>
-           </SelectContent>
+          <SelectContent>
+            <SelectItem value="foundation1">{t("register.year.foundation1")}</SelectItem>
+            <SelectItem value="foundation2">{t("register.year.foundation2")}</SelectItem>
+            <SelectItem value="foundation3">{t("register.year.foundation3")}</SelectItem>
+            <SelectItem value="foundation4">{t("register.year.foundation4")}</SelectItem>
+            <SelectItem value="study1">{t("register.year.study1")}</SelectItem>
+            <SelectItem value="study2">{t("register.year.study2")}</SelectItem>
+            <SelectItem value="study3">{t("register.year.study3")}</SelectItem>
+            <SelectItem value="study4">{t("register.year.study4")}</SelectItem>
+            <SelectItem value="graduate">{t("register.year.graduate")}</SelectItem>
+          </SelectContent>
         </Select>
       </div>
 

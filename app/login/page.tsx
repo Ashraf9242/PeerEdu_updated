@@ -14,6 +14,7 @@ import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useLanguage } from "@/contexts/language-context"
+import { signIn } from "next-auth/react"
 
 export default function LoginPage() {
   const { t } = useLanguage()
@@ -26,7 +27,7 @@ export default function LoginPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
-            
+              
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{t("login.title")}</h1>
               <p className="text-muted-foreground">{t("login.subtitle")}</p>
             </div>
@@ -39,9 +40,9 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                {t("login.signup").split("?")[0]}?{" "}
+                {t("login.signup.prefix")}? {" "}
                 <Link href="/register" className="text-primary hover:underline font-medium">
-                  {t("login.signup").includes("Sign up here") ? "Sign up here" : "أنشئ حساباً هنا"}
+                  {t("login.signup.link")}
                 </Link>
               </p>
             </div>
@@ -60,10 +61,15 @@ function LoginForm() {
   const [password, setPassword] = useState("")
   const { t } = useLanguage()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { email, password })
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: true,
+      callbackUrl: "/dashboard/student",
+    })
+    // next-auth handles redirects; res may be null in latest versions
   }
 
   return (
