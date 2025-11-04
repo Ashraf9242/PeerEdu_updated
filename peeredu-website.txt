@@ -1,0 +1,115 @@
+peeredu-website/
+├── 📁 app/                          # Next.js App Router pages
+│   ├── 📄 page.tsx                  # 🏠 Landing/Homepage
+│   ├── 📄 layout.tsx                # Global layout wrapper
+│   ├── 📄 globals.css               # Global styles & theme colors
+│   ├── 📁 about/
+│   │   └── 📄 page.tsx              # ℹ️ About Us page
+│   ├── 📁 login/
+│   │   └── 📄 page.tsx              # 🔐 Login page
+│   └── 📁 register/
+│       └── 📄 page.tsx              # 📝 Register page
+│
+├── 📁 components/                   # Reusable UI components
+│   ├── 📄 navigation.tsx            # Top navigation bar
+│   ├── 📄 footer.tsx                # Footer component
+│   ├── 📄 theme-toggle.tsx          # Dark/light mode switcher
+│   ├── 📄 language-switcher.tsx     # English/Arabic switcher
+│   ├── 📄 theme-provider.tsx        # Theme context provider
+│   └── 📁 ui/                       # Shadcn UI components
+│       ├── 📄 button.tsx            # Button component
+│       ├── 📄 card.tsx              # Card component
+│       ├── 📄 badge.tsx             # Badge component
+│       ├── 📄 dropdown-menu.tsx     # Dropdown menu
+│       ├── 📄 input.tsx             # Input field
+│       ├── 📄 label.tsx             # Form label
+│       ├── 📄 select.tsx            # Select dropdown
+│       └── ... (other UI components)
+│
+├── 📁 contexts/                     # App-wide state management
+│   └── 📄 language-context.tsx      # Language switching & translations
+│
+├── 📁 hooks/                        # Custom React hooks
+│   ├── 📄 use-mobile.tsx            # Mobile detection hook
+│   └── 📄 use-toast.ts              # Toast notifications hook
+│
+├── 📁 lib/                          # Utility functions
+│   └── 📄 utils.ts                  # Helper functions (cn, etc.)
+│
+├── 📁 public/                       # Static assets
+│   └── 📁 images/
+│       └── 📄 peeredu-logo.png      # PeerEdu logo
+│
+├── 📄 next.config.mjs               # Next.js configuration
+├── 📄 package.json                  # Dependencies & scripts
+└── 📄 tsconfig.json                 # TypeScript configuration
+
+
+
+Thought for 1sExplored project structureHere's the complete folder structure of your PeerEdu website project:
+
+## **Project Structure**
+
+```plaintext
+peeredu-website/
+├── 📁 app/                          # Next.js App Router pages
+│   ├── 📄 page.tsx                  # 🏠 Landing/Homepage
+│   ├── 📄 layout.tsx                # Global layout wrapper
+│   ├── 📄 globals.css               # Global styles & theme colors
+│   ├── 📁 about/
+│   │   └── 📄 page.tsx              # ℹ️ About Us page
+│   ├── 📁 login/
+│   │   └── 📄 page.tsx              # 🔐 Login page
+│   └── 📁 register/
+│       └── 📄 page.tsx              # 📝 Register page
+│
+├── 📁 components/                   # Reusable UI components
+│   ├── 📄 navigation.tsx            # Top navigation bar
+│   ├── 📄 footer.tsx                # Footer component
+│   ├── 📄 theme-toggle.tsx          # Dark/light mode switcher
+│   ├── 📄 language-switcher.tsx     # English/Arabic switcher
+│   ├── 📄 theme-provider.tsx        # Theme context provider
+│   └── 📁 ui/                       # Shadcn UI components
+│       ├── 📄 button.tsx            # Button component
+│       ├── 📄 card.tsx              # Card component
+│       ├── 📄 badge.tsx             # Badge component
+│       ├── 📄 dropdown-menu.tsx     # Dropdown menu
+│       ├── 📄 input.tsx             # Input field
+│       ├── 📄 label.tsx             # Form label
+│       ├── 📄 select.tsx            # Select dropdown
+│       └── ... (other UI components)
+│
+├── 📁 contexts/                     # App-wide state management
+│   └── 📄 language-context.tsx      # Language switching & translations
+│
+├── 📁 hooks/                        # Custom React hooks
+│   ├── 📄 use-mobile.tsx            # Mobile detection hook
+│   └── 📄 use-toast.ts              # Toast notifications hook
+│
+├── 📁 lib/                          # Utility functions
+│   └── 📄 utils.ts                  # Helper functions (cn, etc.)
+│
+├── 📁 public/                       # Static assets
+│   └── 📁 images/
+│       └── 📄 peeredu-logo.png      # PeerEdu logo
+│
+├── 📄 next.config.mjs               # Next.js configuration
+├── 📄 package.json                  # Dependencies & scripts
+└── 📄 tsconfig.json                 # TypeScript configuration
+```
+
+## **Key Pages You Can Edit:**
+
+- **`app/page.tsx`** - Main landing page with hero, features, mission/vision
+- **`app/login/page.tsx`** - Login form page
+- **`app/register/page.tsx`** - Registration form page
+- **`app/about/page.tsx`** - About us page with company details
+- **`contexts/language-context.tsx`** - All translations (English/Arabic)
+
+
+## **Main Components:**
+
+- **`components/navigation.tsx`** - Header with logo, menu, theme toggle
+- **`components/footer.tsx`** - Footer with contact info & social links
+- **`components/theme-toggle.tsx`** - Dark/light mode switcher
+- **`components/language-switcher.tsx`** - English/Arabic language toggle
