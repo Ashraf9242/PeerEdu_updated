@@ -43,6 +43,7 @@ html {
       <body className={`${sourceSans.variable} ${playfair.variable} antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
           <LanguageProvider>{children}</LanguageProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

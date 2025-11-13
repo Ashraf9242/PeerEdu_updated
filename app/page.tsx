@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BookOpen, Users, Star, GraduationCap, Clock, Shield, Target, Eye, Heart } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/language-context"
+import { AvailabilityManager } from "@/components/availability-manager"
 
 export default function HomePage() {
   const { t } = useLanguage()
@@ -209,6 +210,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <AvailabilityManager tutorId="dummy-tutor-123" initialAvailabilities={[]} />
 
       <Footer />
     </div>
