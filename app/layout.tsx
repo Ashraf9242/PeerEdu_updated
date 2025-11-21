@@ -5,6 +5,8 @@ import { Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/contexts/language-context"
+import ClientSessionProvider from "@/components/session-provider"
+import { Toaster } from "@/components/ui/sonner"
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -41,10 +43,12 @@ html {
         `}</style>
       </head>
       <body className={`${sourceSans.variable} ${playfair.variable} antialiased`} suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
-          <LanguageProvider>{children}</LanguageProvider>
-          <Toaster />
-        </ThemeProvider>
+        <ClientSessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
+            <LanguageProvider>{children}</LanguageProvider>
+            <Toaster />
+          </ThemeProvider>
+        </ClientSessionProvider>
       </body>
     </html>
   )

@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { NotificationBell } from "@/components/notification-bell"
 import { Menu, X } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
@@ -59,6 +60,7 @@ export function Navigation() {
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             <LanguageSwitcher />
+            <NotificationBell />
 
             {/* Mobile menu button */}
             <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
