@@ -15,6 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone, Upload } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { useLanguage } from "@/contexts/language-context"
 
 export default function RegisterPage() {
@@ -58,10 +60,12 @@ export default function RegisterPage() {
 
 function RegisterForm() {
   const { t } = useLanguage()
+  const router = useRouter()
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     role: "student",
     firstName: "",
@@ -76,11 +80,60 @@ function RegisterForm() {
     agreeToTerms: false,
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle registration logic here
-    console.log("Registration attempt:", formData)
-    console.log("Selected file:", selectedFile)
+
+    if (!formData.agreeToTerms) {
+      toast.error("Please accept the terms and privacy policy to continue.")
+      return
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match.")
+      return
+    }
+
+    if (!selectedFile) {
+      toast.error("Please upload your student ID document.")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const payload = new FormData()
+      payload.append("role", formData.role)
+      payload.append("firstName", formData.firstName)
+      payload.append("middleName", formData.middleName)
+      payload.append("familyName", formData.familyName)
+      payload.append("phone", formData.phone)
+      payload.append("email", formData.email)
+      payload.append("university", formData.university)
+      payload.append("yearOfStudy", formData.yearOfStudy)
+      payload.append("password", formData.password)
+      payload.append("confirmPassword", formData.confirmPassword)
+      payload.append("agreeToTerms", String(formData.agreeToTerms))
+      payload.append("idDocument", selectedFile)
+
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        body: payload,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        toast.error(result?.error || "Failed to create your account.")
+        return
+      }
+
+      toast.success(result.message || "Account created successfully.")
+      router.push("/login?registered=1")
+    } catch (error) {
+      console.error("Registration error:", error)
+      toast.error("Unable to create your account right now. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -208,7 +261,7 @@ function RegisterForm() {
         <Label htmlFor="university">{t("register.university")}</Label>
         <div className="relative">
           <GraduationCap className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Select onValueChange={(value) => handleInputChange("university", value)}>
+          <Select value={formData.university || undefined} onValueChange={(value) => handleInputChange("university", value)}>
             <SelectTrigger className="pl-10 bg-background">
               <SelectValue placeholder={t("register.placeholder.university")} />
             </SelectTrigger>
@@ -238,7 +291,7 @@ function RegisterForm() {
       {/* Year of Study */}
       <div className="space-y-2">
         <Label htmlFor="yearOfStudy">{t("register.yearOfStudy")}</Label>
-        <Select onValueChange={(value) => handleInputChange("yearOfStudy", value)}>
+        <Select value={formData.yearOfStudy || undefined} onValueChange={(value) => handleInputChange("yearOfStudy", value)}>
           <SelectTrigger className="bg-background">
             <SelectValue placeholder={t("register.placeholder.yearOfStudy")} />
           </SelectTrigger>
@@ -342,8 +395,8 @@ function RegisterForm() {
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" size="lg" disabled={!formData.agreeToTerms}>
-        {t("register.submit")}
+      <Button type="submit" className="w-full" size="lg" disabled={!formData.agreeToTerms || isSubmitting}>
+        {isSubmitting ? t("register.loading") : t("register.submit")}
       </Button>
 
       

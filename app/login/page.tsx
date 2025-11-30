@@ -12,7 +12,10 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { Suspense, useEffect, useState } from "react"
+import { signIn } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import { useLanguage } from "@/contexts/language-context"
 
 export default function LoginPage() {
@@ -33,7 +36,9 @@ export default function LoginPage() {
 
             <Card className="p-6">
               <CardContent className="space-y-4 p-0">
-                <LoginForm />
+                <Suspense fallback={<div className="py-4 text-center text-sm text-muted-foreground">{t("login.loading")}</div>}>
+                  <LoginForm />
+                </Suspense>
               </CardContent>
             </Card>
 
@@ -58,12 +63,61 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { t } = useLanguage()
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (searchParams.get("registered") === "1") {
+      toast.success("Account created successfully. Please log in.")
+    }
+  }, [searchParams])
+
+  const getDashboardRoute = (role?: string | null) => {
+    switch (role) {
+      case "TEACHER":
+        return "/dashboard/teacher"
+      case "ADMIN":
+        return "/dashboard/admin"
+      default:
+        return "/dashboard/student"
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { email, password })
+    setIsSubmitting(true)
+    try {
+      const callbackUrl = searchParams.get("callbackUrl") ?? undefined
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+
+      if (!result || result.error) {
+        toast.error("Invalid email or password. Please try again.")
+        return
+      }
+
+      let destination = callbackUrl
+      if (!destination) {
+        const sessionResponse = await fetch("/api/auth/session")
+        const session = sessionResponse.ok ? await sessionResponse.json() : null
+        destination = getDashboardRoute(session?.user?.role)
+      }
+
+      router.push(destination || "/dashboard/student")
+      router.refresh()
+      toast.success("Logged in successfully.")
+    } catch (error) {
+      console.error("Login error:", error)
+      toast.error("Unable to sign in right now. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -121,8 +175,8 @@ function LoginForm() {
         </Link>
       </div>
 
-      <Button type="submit" className="w-full" size="lg">
-        {t("login.submit")}
+      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? t("login.loading") : t("login.submit")}
       </Button>
 
       

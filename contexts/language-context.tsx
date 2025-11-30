@@ -84,6 +84,7 @@ const translations = {
     "login.remember": "Remember me",
     "login.forgot": "Forgot password?",
     "login.submit": "Sign In",
+    "login.loading": "Signing you in...",
     "login.signup": "Don't have an account? Sign up here",
 
     // Register Page
@@ -106,6 +107,7 @@ const translations = {
     "register.uploadId": "Upload Student ID ",
     "register.terms": "I agree to the Terms of Service and Privacy Policy",
     "register.submit": "Register",
+    "register.loading": "Creating your account...",
     "register.signin": "Already have an account? Sign in here",
     "register.continue": "Or continue with",
     "register.google": "Google",
@@ -371,6 +373,7 @@ const translations = {
     "login.remember": "تذكرني",
     "login.forgot": "نسيت كلمة المرور؟",
     "login.submit": "تسجيل الدخول",
+    "login.loading": "جارٍ تسجيل الدخول...",
     "login.signup": "ليس لديك حساب؟ أنشئ حساباً هنا",
 
     // Register Page
@@ -393,6 +396,7 @@ const translations = {
     "register.uploadId": "رفع هوية الطالب",
     "register.terms": "أوافق على شروط الخدمة وسياسة الخصوصية",
     "register.submit": "تسجيل",
+    "register.loading": "جارٍ إنشاء الحساب...",
     "register.signin": "لديك حساب بالفعل؟ سجل دخولك هنا",
     "register.continue": "أو تابع مع",
     "register.google": "جوجل",
