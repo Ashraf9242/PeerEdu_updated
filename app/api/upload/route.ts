@@ -46,6 +46,14 @@ const parseForm = async (
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth()
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { image: true, idDocumentUrl: true },
+    })
+
+    if (!dbUser) {
+      return NextResponse.json({ success: false, error: "User not found." }, { status: 404 })
+    }
 
     const { fields, files } = await parseForm(req)
     const file = Array.isArray(files.file) ? files.file[0] : files.file
@@ -86,15 +94,15 @@ export async function POST(req: NextRequest) {
 
     // 3. Cleanup old image from Cloudinary before uploading new one
     let oldPublicId: string | null = null
-    if (type === "profile" && user.image?.includes("cloudinary")) {
+    if (type === "profile" && dbUser?.image?.includes("cloudinary")) {
       // Extracts the full public_id including folders from the URL
       // e.g., https://res.cloudinary.com/.../upload/v123/peeredu/userId/profile/filename.webp -> peeredu/userId/profile/filename
-      const publicIdWithVersion = user.image.split("/").slice(-5).join("/") // Assumes path like /peeredu/userId/type/filename
+      const publicIdWithVersion = dbUser.image.split("/").slice(-5).join("/") // Assumes path like /peeredu/userId/type/filename
       const publicIdWithExtension = publicIdWithVersion.substring(publicIdWithVersion.indexOf("/") + 1)
       oldPublicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf("."))
-    } else if (type === "id" && user.idDocumentUrl?.includes("cloudinary")) {
+    } else if (type === "id" && dbUser?.idDocumentUrl?.includes("cloudinary")) {
       // Extracts the full public_id including folders from the URL
-      const publicIdWithVersion = user.idDocumentUrl.split("/").slice(-5).join("/")
+      const publicIdWithVersion = dbUser.idDocumentUrl.split("/").slice(-5).join("/")
       const publicIdWithExtension = publicIdWithVersion.substring(publicIdWithVersion.indexOf("/") + 1)
       oldPublicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf("."))
     }

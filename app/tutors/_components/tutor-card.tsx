@@ -48,11 +48,11 @@ export function TutorCard({ tutor }: TutorCardProps) {
         <div className="flex justify-between items-center text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-bold text-primary">{tutorProfile.ratingAvg?.toFixed(1)}</span>
+                <span className="font-bold text-primary">{Number(tutorProfile.ratingAvg ?? 0).toFixed(1)}</span>
                 <span>({tutorProfile.ratingCount} reviews)</span>
             </div>
             <div>
-                <span className="font-bold text-lg text-primary">${tutorProfile.hourlyRate}</span>
+                <span className="font-bold text-lg text-primary">${Number(tutorProfile.hourlyRate).toFixed(2)}</span>
                 <span className="text-xs">/hr</span>
             </div>
         </div>

@@ -12,7 +12,7 @@ interface SendEmailOptions {
 }
 
 export const sendEmail = async ({ to, subject, react }: SendEmailOptions) => {
-  const html = render(react);
+  const html = await render(react);
 
   try {
     const { data, error } = await resend.emails.send({

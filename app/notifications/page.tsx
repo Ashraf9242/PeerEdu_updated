@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useNotifications } from "@/hooks/use-notifications";
+import { useNotifications, type NotificationItem as NotificationRecord } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trash2, Mail, MailOpen } from "lucide-react";
@@ -10,7 +10,13 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-function NotificationItem({ notification, onMarkRead, onDelete }) {
+interface NotificationRowProps {
+  notification: NotificationRecord;
+  onMarkRead: (id: string) => Promise<void> | void;
+  onDelete: (id: string) => Promise<void> | void;
+}
+
+function NotificationRow({ notification, onMarkRead, onDelete }: NotificationRowProps) {
   const router = useRouter();
 
   const handleItemClick = () => {
@@ -113,7 +119,7 @@ export default function NotificationsPage() {
           {isError && <p>Failed to load notifications.</p>}
           {notifications && notifications.length > 0 ? (
             notifications.map((n) => (
-              <NotificationItem
+              <NotificationRow
                 key={n.id}
                 notification={n}
                 onMarkRead={handleMarkRead}
@@ -131,7 +137,7 @@ export default function NotificationsPage() {
           {isError && <p>Failed to load notifications.</p>}
           {notifications && notifications.length > 0 ? (
             notifications.map((n) => (
-              <NotificationItem
+              <NotificationRow
                 key={n.id}
                 notification={n}
                 onMarkRead={handleMarkRead}

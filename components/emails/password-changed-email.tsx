@@ -47,7 +47,7 @@ export const PasswordChangedEmail = ({
             If you were not the one who made this change, please contact our
             support team immediately to secure your account.
           </Text>
-          <Button pX={20} pY={12} style={button} href={contactLink}>
+          <Button style={button} href={contactLink}>
             Contact Support
           </Button>
           <Hr style={hr} />
@@ -108,6 +108,7 @@ const button = {
   textAlign: "center" as const,
   display: "block",
   width: "100%",
+  padding: "12px 20px",
 }
 
 const hr = {

@@ -1,6 +1,7 @@
 
 "use server";
 
+import { BookingStatus } from "@prisma/client";
 import { requireRole } from "@/auth-utils";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
@@ -28,7 +29,7 @@ export async function submitReview(values: z.infer<typeof reviewSchema>) {
         if (booking.studentId !== student.id) {
             return { success: false, error: "Unauthorized." };
         }
-        if (booking.status !== 'COMPLETED') {
+        if (booking.status !== BookingStatus.COMPLETED) {
             return { success: false, error: "Can only review completed sessions." };
         }
         if (booking.review) {
@@ -43,8 +44,9 @@ export async function submitReview(values: z.infer<typeof reviewSchema>) {
             return { success: false, error: "Tutor profile not found." };
         }
 
+        const currentAvg = Number(tutorProfile.ratingAvg ?? 0);
         const newRatingCount = tutorProfile.ratingCount + 1;
-        const newRatingAvg = ((tutorProfile.ratingAvg || 0) * tutorProfile.ratingCount + rating) / newRatingCount;
+        const newRatingAvg = (currentAvg * tutorProfile.ratingCount + rating) / newRatingCount;
 
         await db.$transaction([
             // Create the review

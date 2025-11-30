@@ -7,7 +7,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UserProfileForm } from "./_components/user-profile-form";
 import { ChangePasswordForm } from "./_components/change-password-form";
-import { prisma } from "@/lib/prisma"; // Assuming prisma client is here
+import { db } from "@/lib/db";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,7 +15,7 @@ export default async function ProfilePage() {
   const user = await requireAuth();
 
   // Fetch full user data from the database
-  const dbUser = await prisma.user.findUnique({
+  const dbUser = await db.user.findUnique({
     where: { id: user.id },
   });
 
@@ -30,6 +30,11 @@ export default async function ProfilePage() {
     return names.map(n => n[0]).join('').toUpperCase();
   };
 
+  const displayName =
+    dbUser.name ||
+    [dbUser.firstName, dbUser.familyName].filter(Boolean).join(" ") ||
+    dbUser.email;
+
   return (
     <div className="container mx-auto py-10">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -37,10 +42,10 @@ export default async function ProfilePage() {
           <Card>
             <CardHeader className="items-center">
               <Avatar className="w-24 h-24 mb-4">
-                <AvatarImage src={dbUser.image || ''} alt={dbUser.name || 'User'} />
-                <AvatarFallback>{getInitials(dbUser.name)}</AvatarFallback>
+                <AvatarImage src={dbUser.image ?? undefined} alt={displayName} />
+                <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
               </Avatar>
-              <CardTitle>{dbUser.name}</CardTitle>
+              <CardTitle>{displayName}</CardTitle>
               <CardDescription>
                 <Badge variant="outline">{dbUser.role}</Badge>
               </CardDescription>

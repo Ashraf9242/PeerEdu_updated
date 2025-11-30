@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { SearchParams } from "../_lib/types";
 
 const PAGE_SIZE = 12;
@@ -13,13 +13,13 @@ export async function getTutors(searchParams: SearchParams) {
   const currentPage = parseInt(page, 10) || 1;
   const skip = (currentPage - 1) * PAGE_SIZE;
 
+  const tutorProfileWhere: Prisma.TutorProfileWhereInput = {
+    isApproved: true,
+  };
+
   const where: Prisma.UserWhereInput = {
-    role: 'TEACHER',
-    tutorProfile: {
-      is: {
-        isApproved: true,
-      },
-    },
+    role: Role.TEACHER,
+    tutorProfile: { is: tutorProfileWhere },
   };
 
   const orderBy: Prisma.UserOrderByWithRelationInput = {};
@@ -29,7 +29,7 @@ export async function getTutors(searchParams: SearchParams) {
     where.OR = [
       { firstName: { contains: q, mode: 'insensitive' } },
       { familyName: { contains: q, mode: 'insensitive' } },
-      { tutorProfile: { subjects: { has: q } } },
+      { tutorProfile: { is: { subjects: { has: q } } } },
     ];
   }
   if (university) {
@@ -37,15 +37,16 @@ export async function getTutors(searchParams: SearchParams) {
   }
   if (subjects) {
     const subjectList = subjects.split(',');
-    where.tutorProfile.is.subjects = { hasSome: subjectList };
+    tutorProfileWhere.subjects = { hasSome: subjectList };
   }
   if (minPrice || maxPrice) {
-      where.tutorProfile.is.hourlyRate = {};
-      if (minPrice) where.tutorProfile.is.hourlyRate.gte = parseInt(minPrice, 10);
-      if (maxPrice) where.tutorProfile.is.hourlyRate.lte = parseInt(maxPrice, 10);
+      tutorProfileWhere.hourlyRate = {
+        ...(minPrice ? { gte: Number(minPrice) } : {}),
+        ...(maxPrice ? { lte: Number(maxPrice) } : {}),
+      };
   }
   if (rating) {
-    where.tutorProfile.is.ratingAvg = { gte: parseInt(rating, 10) };
+    tutorProfileWhere.ratingAvg = { gte: Number(rating) };
   }
 
   // Sorting

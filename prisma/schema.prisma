@@ -11,16 +11,18 @@ generator client {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  passwordHash  String    @map("password_hash")
+  name          String?
+  password      String?   @map("password_hash")
   firstName     String    @map("first_name")
   middleName    String?   @map("middle_name")
   familyName    String    @map("family_name")
   image         String?
+  idDocumentUrl String?   @map("id_document_url")
   phone         String?
   role          Role      @default(STUDENT)
   university    String?
-  yearOfStudy   String?   @map("year_of_study")
-  isSuspended   Boolean   @default(false) @map("is_suspended")
+  academicYear  String?   @map("year_of_study")
+  status        AccountStatus @default(ACTIVE)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -107,7 +109,7 @@ model Review {
 model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  type      String
+  type      NotificationType
   title     String
   message   String
   link      String?
@@ -134,10 +136,25 @@ enum Role {
   ADMIN
 }
 
+enum AccountStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
   COMPLETED
   CANCELLED
   REJECTED
+}
+
+enum NotificationType {
+  BOOKING_REQUEST
+  BOOKING_CONFIRMED
+  BOOKING_REJECTED
+  NEW_REVIEW
+  TUTOR_APPROVED
+  TUTOR_REJECTED
 }

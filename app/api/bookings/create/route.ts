@@ -2,6 +2,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { differenceInHours, isFuture, isAfter } from "date-fns";
+import { BookingStatus, Role } from "@prisma/client";
 
 import { requireRole } from "@/auth-utils";
 import { db } from "@/lib/db";
@@ -49,21 +50,15 @@ export async function POST(req: NextRequest) {
         const { tutorId, subject, description, startAt, endAt } = validation.data;
 
         // 3. Fetch tutor and check availability
-        const tutor = await db.user.findUnique({
-            where: { id: tutorId, role: 'TEACHER' },
+        const tutor = await db.user.findFirst({
+            where: { id: tutorId, role: Role.TEACHER },
             include: {
-                tutorProfile: {
-                    include: {
-                        availabilities: true,
-                        // Fetch bookings that could potentially conflict
-                        bookings: {
-                            where: {
-                                OR: [
-                                    { startAt: { lt: endAt }, endAt: { gt: startAt } }
-                                ],
-                                status: { notIn: ['CANCELLED', 'REJECTED'] }
-                            }
-                        }
+                tutorProfile: true,
+                availabilities: true,
+                tutorBookings: {
+                    where: {
+                        OR: [{ startAt: { lt: endAt }, endAt: { gt: startAt } }],
+                        status: { notIn: [BookingStatus.CANCELLED, BookingStatus.REJECTED] }
                     }
                 }
             }
@@ -74,14 +69,14 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Check for booking conflicts
-        if (tutor.tutorProfile.bookings.length > 0) {
+        if (tutor.tutorBookings.length > 0) {
             return NextResponse.json({ success: false, error: "The selected time slot is no longer available." }, { status: 409 });
         }
 
         // 5. Verify the requested time is within the tutor's general availability
         // This is a simplified check. A more robust solution would check slot by slot.
         const dayOfWeek = startAt.getDay();
-        const isAvailable = tutor.tutorProfile.availabilities.some(avail => {
+        const isAvailable = tutor.availabilities.some(avail => {
             const startHour = parseInt(avail.startTime.split(':')[0]);
             const endHour = parseInt(avail.endTime.split(':')[0]);
             return avail.weekday === dayOfWeek &&
@@ -95,7 +90,8 @@ export async function POST(req: NextRequest) {
 
         // 6. Calculate price
         const durationInHours = differenceInHours(endAt, startAt);
-        const price = durationInHours * tutor.tutorProfile.hourlyRate;
+        const hourlyRate = Number(tutor.tutorProfile.hourlyRate);
+        const price = durationInHours * hourlyRate;
 
         // 7. Create the booking
         const newBooking = await db.booking.create({
@@ -107,7 +103,7 @@ export async function POST(req: NextRequest) {
                 startAt,
                 endAt,
                 price,
-                status: 'PENDING',
+                status: BookingStatus.PENDING,
             }
         });
 

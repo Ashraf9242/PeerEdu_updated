@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Booking, User } from "@prisma/client";
+import type { getTeacherDashboardData } from "../_actions/get-dashboard-data";
 import { format } from "date-fns";
 import { Link, MoreHorizontal } from "lucide-react";
 import { useTransition, useState } from "react";
@@ -37,7 +37,8 @@ import { addMeetingLink } from "../_actions/add-meeting-link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-type UpcomingBooking = Booking & { student: Pick<User, 'name' | 'image'> };
+type TeacherDashboardData = Awaited<ReturnType<typeof getTeacherDashboardData>>;
+type UpcomingBooking = TeacherDashboardData["upcomingSessions"][number];
 
 interface UpcomingSessionsProps {
     teacherId: string;

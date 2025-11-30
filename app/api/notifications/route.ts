@@ -1,7 +1,9 @@
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/auth.ts";
+import { Prisma } from "@prisma/client";
+
+import { authOptions } from "@/auth";
 import { db } from "@/lib/db";
 
 export async function GET(req: Request) {
@@ -12,13 +14,15 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const read = searchParams.get("read"); // 'true', 'false', or null
+    const parsedPage = parseInt(searchParams.get("page") || "1", 10);
+    const parsedLimit = parseInt(searchParams.get("limit") || "10", 10);
+    const read = searchParams.get("read");
 
+    const page = Number.isNaN(parsedPage) ? 1 : Math.max(1, parsedPage);
+    const limit = Number.isNaN(parsedLimit) ? 10 : Math.min(50, Math.max(1, parsedLimit));
     const skip = (page - 1) * limit;
 
-    const whereClause: any = {
+    const whereClause: Prisma.NotificationWhereInput = {
         userId: session.user.id,
     };
 
@@ -40,10 +44,15 @@ export async function GET(req: Request) {
 
         const totalNotifications = await db.notification.count({ where: whereClause });
 
+        const unreadCount = await db.notification.count({
+            where: { userId: session.user.id, read: false },
+        });
+
         return NextResponse.json({
             notifications,
             totalPages: Math.ceil(totalNotifications / limit),
             currentPage: page,
+            unreadCount,
         });
     } catch (error) {
         console.error("[GET_NOTIFICATIONS]", error);

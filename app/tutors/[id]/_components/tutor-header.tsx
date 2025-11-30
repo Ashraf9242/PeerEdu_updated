@@ -24,6 +24,9 @@ export function TutorHeader({ tutor }: TutorHeaderProps) {
         return names.map(n => n[0]).join('').toUpperCase();
     };
 
+    const hourlyRate = Number(tutorProfile.hourlyRate);
+    const averageRating = Number(tutorProfile.ratingAvg ?? 0);
+
     return (
         <div className="flex flex-col md:flex-row gap-8 items-start">
             <Avatar className="w-32 h-32 border-4 border-primary/20">
@@ -36,7 +39,7 @@ export function TutorHeader({ tutor }: TutorHeaderProps) {
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-3 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                         <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                        <span className="font-bold text-lg text-primary">{tutorProfile.ratingAvg?.toFixed(1)}</span>
+                        <span className="font-bold text-lg text-primary">{averageRating.toFixed(1)}</span>
                         <span className="text-sm">({tutorProfile.ratingCount} reviews)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -51,7 +54,7 @@ export function TutorHeader({ tutor }: TutorHeaderProps) {
             </div>
             <div className="w-full md:w-auto flex flex-col items-end gap-2">
                 <p className="text-3xl font-bold text-primary">
-                    ${tutorProfile.hourlyRate}<span className="text-base font-normal text-muted-foreground">/hr</span>
+                    ${hourlyRate.toFixed(2)}<span className="text-base font-normal text-muted-foreground">/hr</span>
                 </p>
                 <Button asChild size="lg" className="w-full">
                     <Link href={`/booking/${tutor.id}`}>Book a Session</Link>

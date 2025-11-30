@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Bell, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-import { useNotifications } from "@/hooks/use-notifications";
+import { useNotifications, type NotificationItem } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -28,7 +28,7 @@ export function NotificationBell() {
     isLoading,
   } = useNotifications(1, 5);
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.read) {
       await markAsRead(notification.id);
     }

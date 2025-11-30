@@ -3,41 +3,53 @@
 import useSWR from "swr";
 import { toast } from "sonner";
 
-interface Notification {
+export interface NotificationItem {
   id: string;
-  type: string;
   title: string;
   message: string;
-  link?: string;
+  link?: string | null;
   read: boolean;
   createdAt: string;
 }
 
+interface NotificationsResponse {
+  notifications: NotificationItem[];
+  currentPage: number;
+  totalPages: number;
+  unreadCount: number;
+}
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-export function useNotifications() {
-  const { data, error, mutate } = useSWR(
-    "/api/notifications?limit=5",
-    fetcher,
-    {
-      refreshInterval: 30000, // Refresh every 30 seconds
-      revalidateOnFocus: true,
-    }
-  );
+export function useNotifications(page = 1, limit = 5, read?: boolean) {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  if (typeof read === "boolean") {
+    params.set("read", String(read));
+  }
+
+  const endpoint = `/api/notifications?${params.toString()}`;
+
+  const { data, error, mutate } = useSWR<NotificationsResponse>(endpoint, fetcher, {
+    refreshInterval: 30000,
+    revalidateOnFocus: true,
+  });
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const response = await fetch(
-        `/api/notifications/${notificationId}/read`,
-        { method: "PUT" }
-      );
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: "PUT",
+      });
 
       if (response.ok) {
-        mutate(); // Refresh data
+        mutate();
       } else {
         toast.error("Failed to mark as read");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update notification");
     }
   };
@@ -54,7 +66,7 @@ export function useNotifications() {
       } else {
         toast.error("Failed to mark all as read");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update notifications");
     }
   };
@@ -71,19 +83,21 @@ export function useNotifications() {
       } else {
         toast.error("Failed to delete notification");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete notification");
     }
   };
 
   return {
-    notifications: data?.notifications || [],
-    unreadCount: data?.unreadCount || 0,
+    notifications: data?.notifications ?? [],
+    unreadCount: data?.unreadCount ?? 0,
+    totalPages: data?.totalPages ?? 1,
+    currentPage: data?.currentPage ?? page,
     isLoading: !error && !data,
     isError: error,
     markAsRead,
     markAllAsRead,
     deleteNotification,
-    refresh: mutate,
+    mutate,
   };
 }

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { token, newPassword } = resetPasswordSchema.parse(body)
 
-    const verificationToken = await db.verificationToken.findUnique({
+    const verificationToken = await db.verificationToken.findFirst({
       where: { token },
     })
 
@@ -71,11 +71,6 @@ export async function POST(req: Request) {
       data: { password: hashedPassword },
     })
 
-    // Invalidate all sessions for this user to force re-login
-    await db.session.deleteMany({
-      where: { userId: user.id },
-    })
-
     // Delete all verification tokens for this user's email
     await db.verificationToken.deleteMany({
       where: { identifier: user.email },
@@ -110,4 +105,3 @@ export async function POST(req: Request) {
     )
   }
 }
-

@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Booking, User } from "@prisma/client";
+import type { getTeacherDashboardData } from "../_actions/get-dashboard-data";
 import { format, differenceInHours } from "date-fns";
 import { Check, X } from "lucide-react";
 import { useTransition, useState } from "react";
@@ -37,7 +37,8 @@ import { acceptBooking } from "../_actions/accept-booking";
 import { rejectBooking } from "../_actions/reject-booking";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type PendingBooking = Booking & { student: Pick<User, 'name' | 'image'> };
+type TeacherDashboardData = Awaited<ReturnType<typeof getTeacherDashboardData>>;
+type PendingBooking = TeacherDashboardData["pendingRequests"][number];
 
 interface PendingRequestsProps {
     teacherId: string;

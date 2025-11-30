@@ -24,7 +24,7 @@ export const ForgotPasswordEmail = ({
         We received a request to reset the password for your PeerEdu account.
         Click the button below to set a new password.
       </Text>
-      <Button pX={20} pY={12} style={button} href={resetLink}>
+      <Button style={button} href={resetLink || "#"}>
         Reset Password
       </Button>
       <Text style={text}>

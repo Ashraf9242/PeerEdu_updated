@@ -75,7 +75,7 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
     startTransition(async () => {
       try {
         // First, upload the image if a new one is selected
-        let imageUrl = user.image;
+        let imageUrl = user.image ?? undefined;
         if (selectedFile) {
           const formData = new FormData();
           formData.append("file", selectedFile);

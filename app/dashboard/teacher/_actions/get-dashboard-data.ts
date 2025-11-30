@@ -9,7 +9,7 @@ export async function getTeacherDashboardData(teacherId: string) {
   const sevenDaysAgo = startOfDay(subDays(now, 6));
 
   const bookings = await db.booking.findMany({
-    where: { teacherId },
+    where: { tutorId: teacherId },
     include: {
       student: {
         select: { name: true, image: true },
@@ -28,7 +28,7 @@ export async function getTeacherDashboardData(teacherId: string) {
   const confirmed = bookings.filter(b => b.status === 'CONFIRMED' && b.startAt > now);
   const completed = bookings.filter(b => b.status === 'COMPLETED');
 
-  const projectedEarnings = confirmed.reduce((acc, b) => acc + b.price, 0);
+  const projectedEarnings = confirmed.reduce((acc, b) => acc + Number(b.price), 0);
 
   const chartData = Array.from({ length: 7 }).map((_, i) => {
     const date = startOfDay(subDays(now, i));
