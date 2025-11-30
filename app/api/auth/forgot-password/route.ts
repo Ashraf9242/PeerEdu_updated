@@ -6,7 +6,8 @@ import * as z from "zod"
 import { db } from "@/lib/db"
 import ForgotPasswordEmail from "@/components/emails/forgot-password-email"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resendApiKey = process.env.RESEND_API_KEY
+const resend = resendApiKey ? new Resend(resendApiKey) : null
 const baseUrl = process.env.NEXTAUTH_URL
 
 const forgotPasswordSchema = z.object({
@@ -44,19 +45,23 @@ export async function POST(req: Request) {
 
       const resetLink = `${baseUrl}/reset-password/${passwordResetToken}`
 
-      try {
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || "PeerEdu <noreply@peeredu.io>",
-          to: [email],
-          subject: "Reset Your PeerEdu Password",
-          react: ForgotPasswordEmail({
-            name: user.name,
-            resetLink: resetLink,
-          }),
-        })
-      } catch (emailError) {
-        console.error("Failed to send password reset email:", emailError)
-        // We still return a success response to the user
+      if (resend) {
+        try {
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM || "PeerEdu <noreply@peeredu.io>",
+            to: [email],
+            subject: "Reset Your PeerEdu Password",
+            react: ForgotPasswordEmail({
+              name: user.name,
+              resetLink: resetLink,
+            }),
+          })
+        } catch (emailError) {
+          console.error("Failed to send password reset email:", emailError)
+          // We still return a success response to the user
+        }
+      } else {
+        console.warn("RESEND_API_KEY is not configured; skipping password reset email.")
       }
     }
 

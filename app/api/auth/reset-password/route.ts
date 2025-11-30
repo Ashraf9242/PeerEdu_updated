@@ -5,7 +5,8 @@ import bcrypt from "bcryptjs"
 import { Resend } from "resend"
 import { PasswordChangedEmail } from "@/components/emails/password-changed-email"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resendApiKey = process.env.RESEND_API_KEY
+const resend = resendApiKey ? new Resend(resendApiKey) : null
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
@@ -77,16 +78,20 @@ export async function POST(req: Request) {
     })
 
     // Send confirmation email
-    try {
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || "PeerEdu <noreply@peeredu.io>",
-        to: [user.email],
-        subject: "Your PeerEdu Password Has Been Changed",
-        react: PasswordChangedEmail({ name: user.name }),
-      })
-    } catch (emailError) {
-      console.error("Failed to send password change confirmation email:", emailError)
-      // Do not block the success response if the email fails
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || "PeerEdu <noreply@peeredu.io>",
+          to: [user.email],
+          subject: "Your PeerEdu Password Has Been Changed",
+          react: PasswordChangedEmail({ name: user.name }),
+        })
+      } catch (emailError) {
+        console.error("Failed to send password change confirmation email:", emailError)
+        // Do not block the success response if the email fails
+      }
+    } else {
+      console.warn("RESEND_API_KEY is not configured; skipping password change confirmation email.")
     }
 
     return NextResponse.json(
