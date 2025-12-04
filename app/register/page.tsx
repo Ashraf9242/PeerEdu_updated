@@ -80,11 +80,71 @@ function RegisterForm() {
     agreeToTerms: false,
   })
 
+  type RequiredFieldKey =
+    | "firstName"
+    | "familyName"
+    | "phone"
+    | "email"
+    | "university"
+    | "yearOfStudy"
+    | "password"
+    | "confirmPassword"
+
+  const validateForm = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const rules: Array<{
+      key: RequiredFieldKey
+      message: string
+      isValid?: (value: string) => boolean
+    }> = [
+      { key: "firstName", message: "Please enter your first name." },
+      { key: "familyName", message: "Please enter your family name." },
+      {
+        key: "phone",
+        message: "Please enter a valid phone number.",
+        isValid: (value) => value.replace(/\D/g, "").length >= 6,
+      },
+      {
+        key: "email",
+        message: "Please enter a valid email address.",
+        isValid: (value) => emailPattern.test(value),
+      },
+      { key: "university", message: "Please select your university." },
+      { key: "yearOfStudy", message: "Please select your year of study." },
+      {
+        key: "password",
+        message: "Please create a password with at least 8 characters.",
+        isValid: (value) => value.length >= 8,
+      },
+      {
+        key: "confirmPassword",
+        message: "Please confirm your password.",
+      },
+    ]
+
+    for (const rule of rules) {
+      const rawValue = formData[rule.key]
+      const value = typeof rawValue === "string" ? rawValue.trim() : ""
+      const isValid = rule.isValid ? rule.isValid(value) : Boolean(value)
+
+      if (!isValid) {
+        toast.error(rule.message)
+        return false
+      }
+    }
+
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.agreeToTerms) {
       toast.error("Please accept the terms and privacy policy to continue.")
+      return
+    }
+
+    if (!validateForm()) {
       return
     }
 
@@ -154,7 +214,7 @@ function RegisterForm() {
 
   return (
     <div className={containerClass}>
-    <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Role Switch */}
       <div className="space-y-2">
         <Label htmlFor="role">{t("register.role.title")}</Label>
@@ -204,7 +264,6 @@ function RegisterForm() {
             value={formData.middleName}
             onChange={(e) => handleInputChange("middleName", e.target.value)}
             className="bg-background"
-            required
           />
         </div>
 
@@ -398,8 +457,6 @@ function RegisterForm() {
       <Button type="submit" className="w-full" size="lg" disabled={!formData.agreeToTerms || isSubmitting}>
         {isSubmitting ? t("register.loading") : t("register.submit")}
       </Button>
-
-      
     </form>
     </div>
   )
