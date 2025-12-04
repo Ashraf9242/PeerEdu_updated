@@ -48,6 +48,8 @@ async function uploadIdDocument(file: File) {
 
   const allowedTypes = [
     "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "image/png",
     "image/jpeg",
     "image/webp",
@@ -165,9 +167,15 @@ export async function POST(req: Request) {
     }
 
     console.error("Registration error:", error)
+    const message = error instanceof Error ? error.message : "Failed to create account. Please try again."
+    const isClientSafeError = error instanceof Error && message.includes("Unsupported file type")
+
     return NextResponse.json(
-      { success: false, error: "Failed to create account. Please try again." },
-      { status: 500 }
+      {
+        success: false,
+        error: isClientSafeError ? message : "Failed to create account. Please try again.",
+      },
+      { status: isClientSafeError ? 400 : 500 }
     )
   }
 }
