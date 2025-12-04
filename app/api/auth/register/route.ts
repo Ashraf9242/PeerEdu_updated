@@ -42,7 +42,8 @@ const registerSchema = z.object({
 
 async function uploadIdDocument(file: File) {
   if (!isCloudinaryConfigured) {
-    throw new Error("File upload service is not configured.")
+    console.warn("Cloudinary credentials missing. Skipping ID document upload.")
+    return null
   }
 
   const allowedTypes = [
@@ -136,7 +137,7 @@ export async function POST(req: Request) {
         phone: parsed.phone,
         university: parsed.university,
         academicYear: parsed.yearOfStudy,
-        idDocumentUrl,
+        idDocumentUrl: idDocumentUrl ?? null,
         role,
         status,
         name: [parsed.firstName, parsed.middleName, parsed.familyName].filter(Boolean).join(" "),
