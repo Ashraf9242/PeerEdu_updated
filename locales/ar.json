@@ -72,8 +72,6 @@
       "teacher": "مدرس",
       "admin": "مسؤول"
     },
-    "uploadId": "رفع الهوية",
-    "idDocument": "مستند إثبات الهوية",
     "errors": {
       "invalidEmail": "البريد الإلكتروني غير صالح.",
       "invalidPassword": "كلمة المرور غير صالحة.",

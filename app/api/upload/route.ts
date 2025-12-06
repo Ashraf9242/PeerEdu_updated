@@ -18,8 +18,6 @@ cloudinary.config({
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
-type UploadType = "profile" | "id"
-
 /**
  * Parses the incoming multipart/form-data request to extract files and fields.
  * @param req - The NextRequest object.
@@ -48,7 +46,7 @@ export async function POST(req: NextRequest) {
     const user = await requireAuth()
     const dbUser = await db.user.findUnique({
       where: { id: user.id },
-      select: { image: true, idDocumentUrl: true },
+      select: { image: true },
     })
 
     if (!dbUser) {
@@ -57,14 +55,14 @@ export async function POST(req: NextRequest) {
 
     const { fields, files } = await parseForm(req)
     const file = Array.isArray(files.file) ? files.file[0] : files.file
-    const type = (Array.isArray(fields.type) ? fields.type[0] : fields.type) as UploadType
+    const type = (Array.isArray(fields.type) ? fields.type[0] : fields.type) as string | undefined
 
     // 1. Validation
     if (!file) {
       return NextResponse.json({ success: false, error: "No file uploaded." }, { status: 400 })
     }
 
-    if (!type || (type !== "profile" && type !== "id")) {
+    if (!type || type !== "profile") {
       return NextResponse.json({ success: false, error: "Invalid upload type specified." }, { status: 400 })
     }
 
@@ -100,11 +98,6 @@ export async function POST(req: NextRequest) {
       const publicIdWithVersion = dbUser.image.split("/").slice(-5).join("/") // Assumes path like /peeredu/userId/type/filename
       const publicIdWithExtension = publicIdWithVersion.substring(publicIdWithVersion.indexOf("/") + 1)
       oldPublicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf("."))
-    } else if (type === "id" && dbUser?.idDocumentUrl?.includes("cloudinary")) {
-      // Extracts the full public_id including folders from the URL
-      const publicIdWithVersion = dbUser.idDocumentUrl.split("/").slice(-5).join("/")
-      const publicIdWithExtension = publicIdWithVersion.substring(publicIdWithVersion.indexOf("/") + 1)
-      oldPublicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf("."))
     }
 
     // 4. Upload to Cloudinary
@@ -129,11 +122,6 @@ export async function POST(req: NextRequest) {
       await db.user.update({
         where: { id: user.id },
         data: { image: newUrl },
-      })
-    } else if (type === "id") {
-      await db.user.update({
-        where: { id: user.id },
-        data: { idDocumentUrl: newUrl },
       })
     }
 

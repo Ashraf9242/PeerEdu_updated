@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone, Upload } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, GraduationCap, Phone } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -64,7 +64,6 @@ function RegisterForm() {
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     role: "student",
@@ -153,11 +152,6 @@ function RegisterForm() {
       return
     }
 
-    if (!selectedFile) {
-      toast.error("Please upload your student ID document.")
-      return
-    }
-
     setIsSubmitting(true)
     try {
       const payload = new FormData()
@@ -172,7 +166,6 @@ function RegisterForm() {
       payload.append("password", formData.password)
       payload.append("confirmPassword", formData.confirmPassword)
       payload.append("agreeToTerms", String(formData.agreeToTerms))
-      payload.append("idDocument", selectedFile)
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -198,13 +191,6 @@ function RegisterForm() {
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-    }
   }
 
   const containerClass =
@@ -418,27 +404,6 @@ function RegisterForm() {
             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </Button>
         </div>
-      </div>
-
-      {/* File Upload */}
-      <div className="space-y-2">
-        <Label htmlFor="uploadId">{t("register.uploadId")}</Label>
-        <div className="relative">
-          <Upload className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="uploadId"
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            onChange={handleFileChange}
-            className="pl-10 bg-background file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            required
-          />
-        </div>
-        {selectedFile && (
-          <p className="text-sm text-muted-foreground">
-            Selected: {selectedFile.name}
-          </p>
-        )}
       </div>
 
       {/* Terms and Conditions */}

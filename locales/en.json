@@ -72,8 +72,6 @@
       "teacher": "Teacher",
       "admin": "Admin"
     },
-    "uploadId": "Upload ID",
-    "idDocument": "ID Document",
     "errors": {
       "invalidEmail": "Invalid email address.",
       "invalidPassword": "Password is not valid.",

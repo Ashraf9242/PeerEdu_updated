@@ -17,7 +17,6 @@ model User {
   middleName    String?   @map("middle_name")
   familyName    String    @map("family_name")
   image         String?
-  idDocumentUrl String?   @map("id_document_url")
   phone         String?
   role          Role      @default(STUDENT)
   university    String?

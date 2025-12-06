@@ -1,23 +1,9 @@
 import { AccountStatus, Role } from "@prisma/client"
 import bcrypt from "bcryptjs"
-import { v2 as cloudinary } from "cloudinary"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
 import { db } from "@/lib/db"
-
-const isCloudinaryConfigured =
-  !!process.env.CLOUDINARY_CLOUD_NAME &&
-  !!process.env.CLOUDINARY_API_KEY &&
-  !!process.env.CLOUDINARY_API_SECRET
-
-if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  })
-}
 
 const registerSchema = z.object({
   role: z.enum(["student", "teacher"]),
@@ -39,45 +25,6 @@ const registerSchema = z.object({
     errorMap: () => ({ message: "You must agree to the terms of service." }),
   }),
 })
-
-async function uploadIdDocument(file: File) {
-  if (!isCloudinaryConfigured) {
-    console.warn("Cloudinary credentials missing. Skipping ID document upload.")
-    return null
-  }
-
-  const allowedTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "image/png",
-    "image/jpeg",
-    "image/webp",
-  ]
-
-  if (!allowedTypes.includes(file.type)) {
-    throw new Error("Unsupported file type. Please upload a PDF or image.")
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer())
-
-  return new Promise<string>((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "peeredu/registrations",
-        resource_type: "auto",
-      },
-      (error, result) => {
-        if (error || !result?.secure_url) {
-          return reject(error ?? new Error("Upload failed"))
-        }
-        resolve(result.secure_url)
-      }
-    )
-
-    uploadStream.end(buffer)
-  })
-}
 
 export async function POST(req: Request) {
   try {
@@ -116,15 +63,6 @@ export async function POST(req: Request) {
       )
     }
 
-    const idFile = formData.get("idDocument")
-    if (!idFile || !(idFile instanceof File)) {
-      return NextResponse.json(
-        { success: false, error: "Student ID file is required." },
-        { status: 400 }
-      )
-    }
-
-    const idDocumentUrl = await uploadIdDocument(idFile)
     const hashedPassword = await bcrypt.hash(parsed.password, 10)
     const role = parsed.role === "teacher" ? Role.TEACHER : Role.STUDENT
     const status = role === Role.TEACHER ? AccountStatus.PENDING : AccountStatus.ACTIVE
@@ -139,7 +77,6 @@ export async function POST(req: Request) {
         phone: parsed.phone,
         university: parsed.university,
         academicYear: parsed.yearOfStudy,
-        idDocumentUrl: idDocumentUrl ?? null,
         role,
         status,
         name: [parsed.firstName, parsed.middleName, parsed.familyName].filter(Boolean).join(" "),
