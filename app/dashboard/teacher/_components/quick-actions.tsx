@@ -1,4 +1,6 @@
 
+"use client"
+
 import Link from "next/link"
 import { BarChart2, Calendar, User, LayoutGrid, Settings } from "lucide-react"
 
