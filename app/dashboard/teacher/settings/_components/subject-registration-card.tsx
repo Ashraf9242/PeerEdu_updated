@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
+import { AvailabilityManager } from "@/components/availability-manager"
 
 type Subject = {
   name: string
@@ -51,7 +52,7 @@ export function SubjectRegistrationCard() {
         <CardDescription>{t("dashboard.teacher.subjectFormSubtitle")}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="subject-name">
@@ -101,6 +102,20 @@ export function SubjectRegistrationCard() {
                 placeholder="A+"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Weekly availability</Label>
+            <p className="text-sm text-muted-foreground">
+              Set the time slots students can book with you.
+            </p>
+            <AvailabilityManager
+              tutorId="teacher-planning"
+              initialAvailabilities={[]}
+              showHeading={false}
+              layout="compact"
+              className="space-y-4"
+            />
           </div>
 
           {subjects.length > 0 && (
