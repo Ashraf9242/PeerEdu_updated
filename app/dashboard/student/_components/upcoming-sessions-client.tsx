@@ -25,12 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Booking, User } from "@prisma/client";
-import { format } from "date-fns";
 import { MoreHorizontal, X, Eye, Video } from "lucide-react";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { cancelBooking } from "../_actions/cancel-booking";
+import { useLanguage } from "@/contexts/language-context";
 
 export type BookingWithTutor = Booking & {
   tutor: Pick<User, "name" | "image">;
@@ -48,15 +48,56 @@ export function UpcomingSessionsClient({
   pendingRequests,
 }: UpcomingSessionsClientProps) {
   const [isPending, startTransition] = useTransition();
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+  const locale = isArabic ? "ar-SA" : "en-US";
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        timeZone: "Asia/Muscat",
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      }),
+    [locale],
+  );
+  const statusLabels = useMemo<Record<"en" | "ar", Record<string, string>>>(
+    () => ({
+      en: {
+        PENDING: "Pending",
+        CONFIRMED: "Confirmed",
+        COMPLETED: "Completed",
+        CANCELLED: "Cancelled",
+      },
+      ar: {
+        PENDING: "قيد الانتظار",
+        CONFIRMED: "مؤكدة",
+        COMPLETED: "مكتملة",
+        CANCELLED: "ملغاة",
+      },
+    }),
+    [],
+  );
 
   const handleCancel = (bookingId: string) => {
-    if (confirm("Are you sure you want to cancel this session?")) {
+    const question = isArabic
+      ? "هل أنت متأكد من إلغاء هذه الجلسة؟"
+      : "Are you sure you want to cancel this session?";
+    if (confirm(question)) {
       startTransition(async () => {
         const result = await cancelBooking(bookingId);
         if (result.success) {
-          toast.success("Session cancelled successfully.");
+          toast.success(
+            isArabic ? "تم إلغاء الجلسة بنجاح." : "Session cancelled successfully.",
+          );
         } else {
-          toast.error(result.error || "Failed to cancel session.");
+          toast.error(
+            result.error ||
+              (isArabic ? "فشل إلغاء الجلسة." : "Failed to cancel session."),
+          );
         }
       });
     }
@@ -67,9 +108,13 @@ export function UpcomingSessionsClient({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upcoming & Pending Sessions</CardTitle>
+        <CardTitle>
+          {isArabic ? "الجلسات القادمة والمعلقة" : "Upcoming & Pending Sessions"}
+        </CardTitle>
         <CardDescription>
-          Here are your scheduled and requested sessions.
+          {isArabic
+            ? "هنا يمكنك متابعة الجلسات المجدولة وطلباتك قيد المراجعة."
+            : "Here are your scheduled and requested sessions."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -77,12 +122,12 @@ export function UpcomingSessionsClient({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tutor</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{isArabic ? "المعلم" : "Tutor"}</TableHead>
+                <TableHead>{isArabic ? "المادة" : "Subject"}</TableHead>
+                <TableHead>{isArabic ? "التاريخ والوقت" : "Date & Time"}</TableHead>
+                <TableHead>{isArabic ? "الحالة" : "Status"}</TableHead>
                 <TableHead>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{isArabic ? "إجراءات" : "Actions"}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -104,10 +149,7 @@ export function UpcomingSessionsClient({
                   </TableCell>
                   <TableCell>{booking.subject}</TableCell>
                   <TableCell>
-                    {format(
-                      new Date(booking.startAt),
-                      "EEE, MMM d, yyyy 'at' h:mm a",
-                    )}
+                    {dateFormatter.format(new Date(booking.startAt))}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -115,7 +157,7 @@ export function UpcomingSessionsClient({
                         booking.status === "PENDING" ? "secondary" : "default"
                       }
                     >
-                      {booking.status}
+                      {statusLabels[language][booking.status] ?? booking.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -123,21 +165,23 @@ export function UpcomingSessionsClient({
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          <span className="sr-only">
+                            {isArabic ? "فتح القائمة" : "Toggle menu"}
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                           <Link href={`/bookings/${booking.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
-                            View Details
+                            {isArabic ? "عرض التفاصيل" : "View Details"}
                           </Link>
                         </DropdownMenuItem>
                         {booking.meetingLink && (
                           <DropdownMenuItem asChild>
                             <Link href={booking.meetingLink} target="_blank">
                               <Video className="mr-2 h-4 w-4" />
-                              Join Session
+                              {isArabic ? "الانضمام للجلسة" : "Join Session"}
                             </Link>
                           </DropdownMenuItem>
                         )}
@@ -148,7 +192,7 @@ export function UpcomingSessionsClient({
                             disabled={isPending}
                           >
                             <X className="mr-2 h-4 w-4" />
-                            Cancel
+                            {isArabic ? "إلغاء" : "Cancel"}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -161,10 +205,14 @@ export function UpcomingSessionsClient({
         ) : (
           <div className="text-center py-10">
             <p className="text-muted-foreground">
-              You have no upcoming sessions.
+              {isArabic
+                ? "لا توجد جلسات قادمة حالياً."
+                : "You have no upcoming sessions."}
             </p>
             <Button asChild className="mt-4">
-              <Link href="/tutors">Find a Tutor</Link>
+              <Link href="/tutors">
+                {isArabic ? "ابحث عن معلم" : "Find a Tutor"}
+              </Link>
             </Button>
           </div>
         )}

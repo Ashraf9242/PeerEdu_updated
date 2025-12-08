@@ -27,14 +27,14 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Booking, User, Review } from "@prisma/client";
-import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { submitReview } from "../_actions/submit-review";
+import { useLanguage } from "@/contexts/language-context";
 
 type CompletedBooking = Booking & {
   tutor: Pick<User, "name" | "image">;
@@ -60,13 +60,27 @@ export function RecentReviewsClient({
   recentCompletedSessions,
 }: RecentReviewsClientProps) {
   const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(isArabic ? "ar-SA" : "en-US", {
+        dateStyle: "medium",
+        timeZone: "Asia/Muscat",
+      }),
+    [isArabic],
+  );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rate Recent Sessions</CardTitle>
+        <CardTitle>
+          {isArabic ? "قيّم الجلسات الأخيرة" : "Rate Recent Sessions"}
+        </CardTitle>
         <CardDescription>
-          Review your past sessions to help others.
+          {isArabic
+            ? "راجع جلساتك السابقة وساعد الطلاب الآخرين."
+            : "Review your past sessions to help others."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -84,7 +98,7 @@ export function RecentReviewsClient({
                 <div>
                   <p className="font-medium">{booking.tutor.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(booking.startAt), "MMM d, yyyy")}
+                    {dateFormatter.format(new Date(booking.startAt))}
                   </p>
                 </div>
               </div>
@@ -110,16 +124,20 @@ export function RecentReviewsClient({
                 >
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                      Rate Session
+                      {isArabic ? "قيّم الجلسة" : "Rate Session"}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>
-                        Review your session with {booking.tutor.name}
+                        {isArabic
+                          ? `قيّم جلستك مع ${booking.tutor.name}`
+                          : `Review your session with ${booking.tutor.name}`}
                       </DialogTitle>
                       <DialogDescription>
-                        Your feedback is valuable.
+                        {isArabic
+                          ? "ملاحظاتك مهمة لتحسين التجربة."
+                          : "Your feedback is valuable."}
                       </DialogDescription>
                     </DialogHeader>
                     <ReviewForm
@@ -130,6 +148,7 @@ export function RecentReviewsClient({
                           [booking.id]: false,
                         }))
                       }
+                      language={language}
                     />
                   </DialogContent>
                 </Dialog>
@@ -138,7 +157,7 @@ export function RecentReviewsClient({
           ))
         ) : (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No completed sessions yet.
+            {isArabic ? "لم تُكمل أي جلسات بعد." : "No completed sessions yet."}
           </p>
         )}
       </CardContent>
@@ -149,24 +168,32 @@ export function RecentReviewsClient({
 function ReviewForm({
   bookingId,
   onReviewSubmit,
+  language,
 }: {
   bookingId: string;
   onReviewSubmit: () => void;
+  language: "en" | "ar";
 }) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
     defaultValues: { bookingId, rating: 5, comment: "" },
   });
+  const isArabic = language === "ar";
 
   const onSubmit = (values: z.infer<typeof reviewSchema>) => {
     startTransition(async () => {
       const result = await submitReview(values);
       if (result.success) {
-        toast.success("Review submitted successfully!");
+        toast.success(
+          isArabic ? "تم إرسال التقييم بنجاح!" : "Review submitted successfully!",
+        );
         onReviewSubmit();
       } else {
-        toast.error(result.error || "Failed to submit review.");
+        toast.error(
+          result.error ||
+            (isArabic ? "تعذر إرسال التقييم." : "Failed to submit review."),
+        );
       }
     });
   };
@@ -179,7 +206,7 @@ function ReviewForm({
           name="rating"
           render={({ field }) => (
             <FormItem className="flex flex-col items-center">
-              <FormLabel>Rating</FormLabel>
+              <FormLabel>{isArabic ? "التقييم" : "Rating"}</FormLabel>
               <FormControl>
                 <StarRating value={field.value} onChange={field.onChange} />
               </FormControl>
@@ -191,10 +218,14 @@ function ReviewForm({
           name="comment"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comment</FormLabel>
+              <FormLabel>{isArabic ? "التعليق" : "Comment"}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Tell us about your experience..."
+                  placeholder={
+                    isArabic
+                      ? "شاركنا تجربتك في هذه الجلسة..."
+                      : "Tell us about your experience..."
+                  }
                   {...field}
                 />
               </FormControl>
@@ -203,7 +234,13 @@ function ReviewForm({
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit Review"}
+          {isPending
+            ? isArabic
+              ? "جاري الإرسال..."
+              : "Submitting..."
+            : isArabic
+              ? "إرسال التقييم"
+              : "Submit Review"}
         </Button>
       </form>
     </Form>
