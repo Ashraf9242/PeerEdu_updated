@@ -13,7 +13,6 @@ import {
 } from "./_components/recent-reviews";
 import type { BookingWithTutor } from "./_components/upcoming-sessions-client";
 import { StudentHeroSection } from "./_components/student-hero";
-import { StatsGrid } from "./_components/stats-grid";
 
 export default async function StudentDashboardPage() {
   const student = await requireRole("STUDENT");
@@ -29,8 +28,6 @@ export default async function StudentDashboardPage() {
         nextSession={nextSession}
         pendingCount={pendingCount}
       />
-
-      <StatsGrid stats={dashboardData.stats} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3" id="sessions">
         <div className="space-y-8 lg:col-span-2">
