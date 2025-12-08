@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   Card,
@@ -48,10 +48,7 @@ interface RecentReviewsClientProps {
 
 const reviewSchema = z.object({
   rating: z.coerce.number().min(1).max(5),
-  comment: z
-    .string()
-    .min(10, "Comment must be at least 10 characters.")
-    .max(500),
+  comment: z.string().min(10).max(500),
   bookingId: z.string(),
 });
 
@@ -60,28 +57,23 @@ export function RecentReviewsClient({
   recentCompletedSessions,
 }: RecentReviewsClientProps) {
   const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
-  const { language } = useLanguage();
-  const isArabic = language === "ar";
+  const { language, t } = useLanguage();
+  const locale = language === "ar" ? "ar-SA" : "en-US";
+
   const dateFormatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(isArabic ? "ar-SA" : "en-US", {
-        dateStyle: "medium",
+      new Intl.DateTimeFormat(locale, {
         timeZone: "Asia/Muscat",
+        dateStyle: "medium",
       }),
-    [isArabic],
+    [locale],
   );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {isArabic ? "قيّم الجلسات الأخيرة" : "Rate Recent Sessions"}
-        </CardTitle>
-        <CardDescription>
-          {isArabic
-            ? "راجع جلساتك السابقة وساعد الطلاب الآخرين."
-            : "Review your past sessions to help others."}
-        </CardDescription>
+        <CardTitle>{t("dashboard.student.reviews.title")}</CardTitle>
+        <CardDescription>{t("dashboard.student.reviews.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recentCompletedSessions.length > 0 ? (
@@ -89,10 +81,7 @@ export function RecentReviewsClient({
             <div key={booking.id} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage
-                    src={booking.tutor.image || ""}
-                    alt={booking.tutor.name || ""}
-                  />
+                  <AvatarImage src={booking.tutor.image || ""} alt={booking.tutor.name || ""} />
                   <AvatarFallback>{booking.tutor.name?.[0]}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -124,31 +113,28 @@ export function RecentReviewsClient({
                 >
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                      {isArabic ? "قيّم الجلسة" : "Rate Session"}
+                      {t("dashboard.student.reviews.rate")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>
-                        {isArabic
-                          ? `قيّم جلستك مع ${booking.tutor.name}`
-                          : `Review your session with ${booking.tutor.name}`}
+                        {t("dashboard.student.reviews.reviewWith").replace("{{name}}", booking.tutor.name || "")}
                       </DialogTitle>
                       <DialogDescription>
-                        {isArabic
-                          ? "ملاحظاتك مهمة لتحسين التجربة."
-                          : "Your feedback is valuable."}
+                        {t("dashboard.student.reviews.feedback")}
                       </DialogDescription>
                     </DialogHeader>
                     <ReviewForm
                       bookingId={booking.id}
+                      language={language}
+                      t={t}
                       onReviewSubmit={() =>
                         setOpenDialogs((prev) => ({
                           ...prev,
                           [booking.id]: false,
                         }))
                       }
-                      language={language}
                     />
                   </DialogContent>
                 </Dialog>
@@ -157,7 +143,7 @@ export function RecentReviewsClient({
           ))
         ) : (
           <p className="text-sm text-muted-foreground text-center py-4">
-            {isArabic ? "لم تُكمل أي جلسات بعد." : "No completed sessions yet."}
+            {t("dashboard.student.reviews.none")}
           </p>
         )}
       </CardContent>
@@ -169,31 +155,27 @@ function ReviewForm({
   bookingId,
   onReviewSubmit,
   language,
+  t,
 }: {
   bookingId: string;
   onReviewSubmit: () => void;
   language: "en" | "ar";
+  t: (key: string) => string;
 }) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
     defaultValues: { bookingId, rating: 5, comment: "" },
   });
-  const isArabic = language === "ar";
 
   const onSubmit = (values: z.infer<typeof reviewSchema>) => {
     startTransition(async () => {
       const result = await submitReview(values);
       if (result.success) {
-        toast.success(
-          isArabic ? "تم إرسال التقييم بنجاح!" : "Review submitted successfully!",
-        );
+        toast.success(t("dashboard.student.reviews.success"));
         onReviewSubmit();
       } else {
-        toast.error(
-          result.error ||
-            (isArabic ? "تعذر إرسال التقييم." : "Failed to submit review."),
-        );
+        toast.error(result.error || t("dashboard.student.reviews.error"));
       }
     });
   };
@@ -206,7 +188,7 @@ function ReviewForm({
           name="rating"
           render={({ field }) => (
             <FormItem className="flex flex-col items-center">
-              <FormLabel>{isArabic ? "التقييم" : "Rating"}</FormLabel>
+              <FormLabel>{t("dashboard.student.reviews.rating")}</FormLabel>
               <FormControl>
                 <StarRating value={field.value} onChange={field.onChange} />
               </FormControl>
@@ -218,14 +200,10 @@ function ReviewForm({
           name="comment"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{isArabic ? "التعليق" : "Comment"}</FormLabel>
+              <FormLabel>{t("dashboard.student.reviews.comment")}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={
-                    isArabic
-                      ? "شاركنا تجربتك في هذه الجلسة..."
-                      : "Tell us about your experience..."
-                  }
+                  placeholder={t("dashboard.student.reviews.placeholder")}
                   {...field}
                 />
               </FormControl>
@@ -235,12 +213,8 @@ function ReviewForm({
         />
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending
-            ? isArabic
-              ? "جاري الإرسال..."
-              : "Submitting..."
-            : isArabic
-              ? "إرسال التقييم"
-              : "Submit Review"}
+            ? t("dashboard.student.reviews.submitting")
+            : t("dashboard.student.reviews.submit")}
         </Button>
       </form>
     </Form>

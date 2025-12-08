@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   Card,
@@ -48,9 +48,9 @@ export function UpcomingSessionsClient({
   pendingRequests,
 }: UpcomingSessionsClientProps) {
   const [isPending, startTransition] = useTransition();
-  const { language } = useLanguage();
-  const isArabic = language === "ar";
-  const locale = isArabic ? "ar-SA" : "en-US";
+  const { language, t } = useLanguage();
+  const locale = language === "ar" ? "ar-SA" : "en-US";
+
   const dateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
@@ -64,40 +64,32 @@ export function UpcomingSessionsClient({
       }),
     [locale],
   );
-  const statusLabels = useMemo<Record<"en" | "ar", Record<string, string>>>(
-    () => ({
-      en: {
-        PENDING: "Pending",
-        CONFIRMED: "Confirmed",
-        COMPLETED: "Completed",
-        CANCELLED: "Cancelled",
-      },
-      ar: {
+
+  const statusLabels = useMemo<Record<string, string>>(() => {
+    if (language === "ar") {
+      return {
         PENDING: "قيد الانتظار",
         CONFIRMED: "مؤكدة",
         COMPLETED: "مكتملة",
         CANCELLED: "ملغاة",
-      },
-    }),
-    [],
-  );
+      };
+    }
+    return {
+      PENDING: "Pending",
+      CONFIRMED: "Confirmed",
+      COMPLETED: "Completed",
+      CANCELLED: "Cancelled",
+    };
+  }, [language]);
 
   const handleCancel = (bookingId: string) => {
-    const question = isArabic
-      ? "هل أنت متأكد من إلغاء هذه الجلسة؟"
-      : "Are you sure you want to cancel this session?";
-    if (confirm(question)) {
+    if (confirm(t("dashboard.student.upcoming.cancelConfirm"))) {
       startTransition(async () => {
         const result = await cancelBooking(bookingId);
         if (result.success) {
-          toast.success(
-            isArabic ? "تم إلغاء الجلسة بنجاح." : "Session cancelled successfully.",
-          );
+          toast.success(t("dashboard.student.upcoming.cancelSuccess"));
         } else {
-          toast.error(
-            result.error ||
-              (isArabic ? "فشل إلغاء الجلسة." : "Failed to cancel session."),
-          );
+          toast.error(result.error || t("dashboard.student.upcoming.cancelError"));
         }
       });
     }
@@ -108,35 +100,28 @@ export function UpcomingSessionsClient({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {isArabic ? "الجلسات القادمة والمعلقة" : "Upcoming & Pending Sessions"}
-        </CardTitle>
-        <CardDescription>
-          {isArabic
-            ? "هنا يمكنك متابعة الجلسات المجدولة وطلباتك قيد المراجعة."
-            : "Here are your scheduled and requested sessions."}
-        </CardDescription>
+        <CardTitle>{t("dashboard.student.upcoming.title")}</CardTitle>
+        <CardDescription>{t("dashboard.student.upcoming.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         {allSessions.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{isArabic ? "المعلم" : "Tutor"}</TableHead>
-                <TableHead>{isArabic ? "المادة" : "Subject"}</TableHead>
-                <TableHead>{isArabic ? "التاريخ والوقت" : "Date & Time"}</TableHead>
-                <TableHead>{isArabic ? "الحالة" : "Status"}</TableHead>
+                <TableHead>{t("dashboard.student.upcoming.tutor")}</TableHead>
+                <TableHead>{t("dashboard.student.upcoming.subject")}</TableHead>
+                <TableHead>{t("dashboard.student.upcoming.datetime")}</TableHead>
+                <TableHead>{t("dashboard.student.upcoming.status")}</TableHead>
                 <TableHead>
-                  <span className="sr-only">{isArabic ? "إجراءات" : "Actions"}</span>
+                  <span className="sr-only">
+                    {t("dashboard.student.upcoming.actions")}
+                  </span>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {allSessions.map((booking) => (
-                <TableRow
-                  key={booking.id}
-                  className={isPending ? "opacity-50" : ""}
-                >
+                <TableRow key={booking.id} className={isPending ? "opacity-50" : ""}>
                   <TableCell className="font-medium flex items-center gap-3">
                     <Avatar className="h-9 w-9">
                       <AvatarImage
@@ -148,16 +133,10 @@ export function UpcomingSessionsClient({
                     {booking.tutor.name}
                   </TableCell>
                   <TableCell>{booking.subject}</TableCell>
+                  <TableCell>{dateFormatter.format(new Date(booking.startAt))}</TableCell>
                   <TableCell>
-                    {dateFormatter.format(new Date(booking.startAt))}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        booking.status === "PENDING" ? "secondary" : "default"
-                      }
-                    >
-                      {statusLabels[language][booking.status] ?? booking.status}
+                    <Badge variant={booking.status === "PENDING" ? "secondary" : "default"}>
+                      {statusLabels[booking.status] ?? booking.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -166,7 +145,7 @@ export function UpcomingSessionsClient({
                         <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">
-                            {isArabic ? "فتح القائمة" : "Toggle menu"}
+                            {t("dashboard.student.upcoming.actions")}
                           </span>
                         </Button>
                       </DropdownMenuTrigger>
@@ -174,25 +153,24 @@ export function UpcomingSessionsClient({
                         <DropdownMenuItem asChild>
                           <Link href={`/bookings/${booking.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
-                            {isArabic ? "عرض التفاصيل" : "View Details"}
+                            {t("dashboard.student.upcoming.viewDetails")}
                           </Link>
                         </DropdownMenuItem>
                         {booking.meetingLink && (
                           <DropdownMenuItem asChild>
                             <Link href={booking.meetingLink} target="_blank">
                               <Video className="mr-2 h-4 w-4" />
-                              {isArabic ? "الانضمام للجلسة" : "Join Session"}
+                              {t("dashboard.student.upcoming.join")}
                             </Link>
                           </DropdownMenuItem>
                         )}
-                        {(booking.status === "PENDING" ||
-                          booking.status === "CONFIRMED") && (
+                        {(booking.status === "PENDING" || booking.status === "CONFIRMED") && (
                           <DropdownMenuItem
                             onClick={() => handleCancel(booking.id)}
                             disabled={isPending}
                           >
                             <X className="mr-2 h-4 w-4" />
-                            {isArabic ? "إلغاء" : "Cancel"}
+                            {t("dashboard.student.upcoming.cancel")}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -205,14 +183,10 @@ export function UpcomingSessionsClient({
         ) : (
           <div className="text-center py-10">
             <p className="text-muted-foreground">
-              {isArabic
-                ? "لا توجد جلسات قادمة حالياً."
-                : "You have no upcoming sessions."}
+              {t("dashboard.student.upcoming.empty")}
             </p>
             <Button asChild className="mt-4">
-              <Link href="/tutors">
-                {isArabic ? "ابحث عن معلم" : "Find a Tutor"}
-              </Link>
+              <Link href="/tutors">{t("dashboard.student.upcoming.findTutor")}</Link>
             </Button>
           </div>
         )}

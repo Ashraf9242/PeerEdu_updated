@@ -8,7 +8,7 @@ import { SearchParams } from "../_lib/types";
 const PAGE_SIZE = 12;
 
 export async function getTutors(searchParams: SearchParams) {
-  const { q, university, subjects, minPrice, maxPrice, rating, sort, page = '1' } = searchParams;
+  const { q, university, subjects, sort, page = "1" } = searchParams;
 
   const currentPage = parseInt(page, 10) || 1;
   const skip = (currentPage - 1) * PAGE_SIZE;
@@ -39,29 +39,19 @@ export async function getTutors(searchParams: SearchParams) {
     const subjectList = subjects.split(',');
     tutorProfileWhere.subjects = { hasSome: subjectList };
   }
-  if (minPrice || maxPrice) {
-      tutorProfileWhere.hourlyRate = {
-        ...(minPrice ? { gte: Number(minPrice) } : {}),
-        ...(maxPrice ? { lte: Number(maxPrice) } : {}),
-      };
-  }
-  if (rating) {
-    tutorProfileWhere.ratingAvg = { gte: Number(rating) };
-  }
-
   // Sorting
   switch (sort) {
-    case 'rating':
-      orderBy.tutorProfile = { ratingAvg: 'desc' };
+    case "rating":
+      orderBy.tutorProfile = { ratingAvg: "desc" };
       break;
-    case 'price':
-      orderBy.tutorProfile = { hourlyRate: 'asc' };
+    case "price":
+      orderBy.tutorProfile = { hourlyRate: "asc" };
       break;
-    case 'experience':
-      orderBy.tutorProfile = { experience: 'desc' }; // Assuming experience is a sortable field
+    case "experience":
+      orderBy.tutorProfile = { experience: "desc" };
       break;
     default:
-      orderBy.tutorProfile = { ratingAvg: 'desc' };
+      orderBy.tutorProfile = { ratingAvg: "desc" };
   }
 
   try {

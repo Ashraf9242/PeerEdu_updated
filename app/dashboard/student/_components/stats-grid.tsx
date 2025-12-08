@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Book, CheckCircle, Clock, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
@@ -16,28 +16,28 @@ interface StatsGridProps {
 }
 
 export function StatsGrid({ stats }: StatsGridProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isArabic = language === "ar";
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title={isArabic ? "الجلسات القادمة" : "Upcoming Sessions"}
-        value={stats.upcomingCount}
+        title={t("dashboard.student.stats.active")}
+        value={`${stats.upcomingCount} ${isArabic ? "قادمة" : "upcoming"}`}
         icon={Clock}
       />
       <StatCard
-        title={isArabic ? "الجلسات المكتملة" : "Completed Sessions"}
-        value={stats.completedCount}
+        title={t("dashboard.student.stats.completed")}
+        value={`${stats.completedCount} ${isArabic ? "جلسات" : "sessions"}`}
         icon={CheckCircle}
       />
       <StatCard
-        title={isArabic ? "إجمالي الساعات" : "Total Hours"}
-        value={stats.totalHours}
+        title={t("dashboard.student.stats.hours")}
+        value={`${stats.totalHours} ${isArabic ? "ساعة" : "hrs"}`}
         icon={Book}
       />
       <StatCard
-        title={isArabic ? "المعلمون المفضلون" : "Favorite Tutors"}
+        title={t("dashboard.student.stats.favorite")}
         value={stats.favoriteTutorsCount}
         icon={Star}
       />

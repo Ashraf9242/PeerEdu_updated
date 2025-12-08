@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { getFilterData } from "../_actions/get-filter-data";
 import { SearchParams } from "../_lib/types";
@@ -11,11 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { MultiSelect } from "./multi-select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Star } from "lucide-react";
 
 interface FiltersSidebarProps {
   searchParams: SearchParams;
@@ -25,7 +22,7 @@ interface FiltersSidebarProps {
 export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const [filterData, setFilterData] = useState<{ universities: string[]; subjects: string[] }>({
     universities: [],
@@ -58,23 +55,59 @@ export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps)
 
   const handleDebouncedUpdate = useDebouncedCallback(handleUpdate, 500);
 
-  const price = [
-      searchParams.minPrice ? parseInt(searchParams.minPrice) : 5,
-      searchParams.maxPrice ? parseInt(searchParams.maxPrice) : 50
-  ]
-
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Filters</CardTitle>
+        <CardTitle>Refine Tutors</CardTitle>
+        <p className="text-sm text-muted-foreground mt-2">
+          Start with your college or university, then narrow in by subject code.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* University */}
+        <div className="space-y-2">
+          <Label htmlFor="university">College / University</Label>
+          <Select
+            value={searchParams.university}
+            onValueChange={(value) => handleUpdate({ university: value === "all" ? null : value })}
+          >
+            <SelectTrigger id="university">
+              <SelectValue placeholder="All institutions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All institutions</SelectItem>
+              {filterData.universities.map((uni) => (
+                <SelectItem key={uni} value={uni}>
+                  {uni}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            We verify every tutor with their university before they go live.
+          </p>
+        </div>
+
+        {/* Subjects */}
+        <div className="space-y-2">
+          <Label>Subject code</Label>
+          <MultiSelect
+            options={filterData.subjects.map((s) => ({ value: s, label: s }))}
+            selected={searchParams.subjects?.split(",") || []}
+            onChange={(selected) => handleUpdate({ subjects: selected.join(",") || null })}
+            placeholder="e.g., MATH210, BUSN101…"
+          />
+          <p className="text-xs text-muted-foreground">
+            Add one or more codes to see tutors who teach them.
+          </p>
+        </div>
+
         {/* Search Input */}
         <div className="space-y-2">
-          <Label htmlFor="search">Search by Name or Subject</Label>
+          <Label htmlFor="search">Search tutors</Label>
           <Input
             id="search"
-            placeholder="e.g., 'Physics' or 'Ahmed'"
+            placeholder="Try a tutor name or keyword"
             defaultValue={searchParams.q}
             onChange={(e) => handleDebouncedUpdate({ q: e.target.value })}
           />
@@ -82,89 +115,20 @@ export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps)
 
         {/* Sort By */}
         <div className="space-y-2">
-          <Label htmlFor="sort">Sort By</Label>
+          <Label htmlFor="sort">Sort results</Label>
           <Select
-            value={searchParams.sort || 'rating'}
+            value={searchParams.sort || "rating"}
             onValueChange={(value) => handleUpdate({ sort: value })}
           >
             <SelectTrigger id="sort">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="rating">Highest Rated</SelectItem>
-              <SelectItem value="price">Lowest Price</SelectItem>
-              <SelectItem value="experience">Most Experienced</SelectItem>
+              <SelectItem value="rating">Best match</SelectItem>
+              <SelectItem value="price">Lowest hourly rate</SelectItem>
+              <SelectItem value="experience">Most experienced</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        {/* University */}
-        <div className="space-y-2">
-          <Label htmlFor="university">University</Label>
-          <Select
-            value={searchParams.university}
-            onValueChange={(value) => handleUpdate({ university: value === 'all' ? null : value })}
-          >
-            <SelectTrigger id="university">
-              <SelectValue placeholder="All Universities" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Universities</SelectItem>
-              {filterData.universities.map((uni) => (
-                <SelectItem key={uni} value={uni}>{uni}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Subjects */}
-        <div className="space-y-2">
-          <Label>Subjects</Label>
-          <MultiSelect
-            options={filterData.subjects.map(s => ({ value: s, label: s }))}
-            selected={searchParams.subjects?.split(',') || []}
-            onChange={(selected) => handleUpdate({ subjects: selected.join(',') || null })}
-            placeholder="Select subjects..."
-          />
-        </div>
-
-        {/* Price Range */}
-        <div className="space-y-2">
-          <Label>Price Range ($/hr)</Label>
-          <Slider
-            min={5}
-            max={50}
-            step={1}
-            defaultValue={price}
-            onValueCommit={(value) => handleUpdate({ minPrice: String(value[0]), maxPrice: String(value[1]) })}
-          />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>${price[0]}</span>
-            <span>${price[1]}</span>
-          </div>
-        </div>
-
-        {/* Rating */}
-        <div className="space-y-2">
-            <Label>Minimum Rating</Label>
-            <RadioGroup 
-                defaultValue={searchParams.rating || 'all'}
-                onValueChange={(value) => handleUpdate({ rating: value === 'all' ? null : value })}
-                className="flex items-center gap-4"
-            >
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="4" id="r1" />
-                    <Label htmlFor="r1" className="flex items-center">4 <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400"/>+</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="3" id="r2" />
-                    <Label htmlFor="r2" className="flex items-center">3 <Star className="w-4 h-4 ml-1 fill-yellow-400 text-yellow-400"/>+</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="r3" />
-                    <Label htmlFor="r3">All</Label>
-                </div>
-            </RadioGroup>
         </div>
 
         <Button

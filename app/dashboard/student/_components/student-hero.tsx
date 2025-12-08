@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { CalendarClock, Sparkles, BellRing, Target } from "lucide-react";
@@ -20,7 +20,7 @@ interface StudentHeroProps {
   pendingCount: number;
 }
 
-const OMAN_UTC_OFFSET = 4; // UTC+4 with no DST
+const OMAN_UTC_OFFSET = 4;
 
 export function StudentHeroSection({
   studentName,
@@ -28,13 +28,12 @@ export function StudentHeroSection({
   nextSession,
   pendingCount,
 }: StudentHeroProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isArabic = language === "ar";
 
   const greeting = getGreeting(language);
   const firstName = extractFirstName(studentName, isArabic);
-  const relativeTime =
-    nextSession && getRelativeTime(nextSession.startAt, language);
+  const relativeTime = nextSession && getRelativeTime(nextSession.startAt, language);
   const nextSessionText = nextSession
     ? nextSessionDescription(nextSession, relativeTime, language)
     : noSessionDescription(language);
@@ -42,18 +41,20 @@ export function StudentHeroSection({
 
   const statsCopy = [
     {
-      label: isArabic ? "جلسات حالية" : "Active Sessions",
+      label: t("dashboard.student.stats.active"),
       value: `${stats.upcomingCount} ${isArabic ? "قادمة" : "upcoming"}`,
     },
     {
-      label: isArabic ? "ساعات التعلم" : "Learning Hours",
+      label: t("dashboard.student.stats.hours"),
       value: `${stats.totalHours} ${isArabic ? "ساعة مسجلة" : "hrs logged"}`,
     },
     {
-      label: isArabic ? "جلسات مكتملة" : "Completed",
-      value: `${stats.completedCount} ${
-        isArabic ? "جلسة" : "sessions"
-      }`,
+      label: t("dashboard.student.stats.completed"),
+      value: `${stats.completedCount} ${isArabic ? "جلسات" : "sessions"}`,
+    },
+    {
+      label: t("dashboard.student.stats.favorite"),
+      value: `${stats.favoriteTutorsCount}`,
     },
   ];
 
@@ -62,6 +63,7 @@ export function StudentHeroSection({
     nextSession,
     pendingCount,
     stats,
+    t,
   });
 
   return (
@@ -70,14 +72,14 @@ export function StudentHeroSection({
         <div className="flex-1 space-y-4">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
             <Sparkles className="h-4 w-4" />
-            {isArabic ? "عرض مخصص" : "Personalized view"}
+            {t("dashboard.student.hero.badge")}
           </span>
           <h1 className="text-4xl font-semibold leading-tight">
             {greeting}, {firstName}.
           </h1>
           <p className="text-lg text-white/85">{nextSessionText}</p>
           <p className="text-sm text-white/70">{pendingText}</p>
-          <div className="mt-6 flex flex-wrap gap-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statsCopy.map(({ label, value }) => (
               <div
                 key={label}
@@ -91,40 +93,30 @@ export function StudentHeroSection({
         </div>
         <div className="w-full rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur lg:w-96">
           <p className="text-sm uppercase tracking-wide text-white/70">
-            {isArabic ? "مركز التحكم" : "Control Center"}
+            {t("dashboard.student.hero.control")}
           </p>
           <ul className="mt-4 space-y-3 text-sm">
-            <li className="flex items-start gap-3 text-white/90">
-              <div className="mt-1 h-2 w-2 rounded-full bg-emerald-300" />
-              {isArabic
-                ? "استمر في استكشاف المعلمين الذين يناسبون أهدافك الدراسية واحفظ المفضلين لديك."
-                : "Keep exploring tutors that match your study goals and bookmark your favorites."}
-            </li>
-            <li className="flex items-start gap-3 text-white/90">
-              <div className="mt-1 h-2 w-2 rounded-full bg-orange-200" />
-              {isArabic
-                ? "قيّم الجلسات المكتملة لمساعدة زملائك على العثور على معلمين متميزين بسرعة."
-                : "Rate completed sessions to help peers find great mentors faster."}
-            </li>
-            <li className="flex items-start gap-3 text-white/90">
-              <div className="mt-1 h-2 w-2 rounded-full bg-sky-200" />
-              {isArabic
-                ? "استخدم الإجراءات السريعة للانتقال مباشرة إلى الحجوزات أو الرسائل أو البحث عن معلم."
-                : "Use quick actions to jump into bookings, messages, or tutor search."}
-            </li>
+            {[t("dashboard.student.hero.point1"), t("dashboard.student.hero.point2"), t("dashboard.student.hero.point3")].map(
+              (copy) => (
+                <li key={copy} className="flex items-start gap-3 text-white/90">
+                  <div className="mt-1 h-2 w-2 rounded-full bg-white/60" />
+                  {copy}
+                </li>
+              ),
+            )}
           </ul>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/tutors"
               className="inline-flex flex-1 items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow hover:bg-white/90"
             >
-              {isArabic ? "ابحث عن معلم" : "Find a Tutor"}
+              {t("dashboard.student.hero.ctaFindTutor")}
             </Link>
             <Link
               href="/dashboard/student/bookings"
               className="inline-flex flex-1 items-center justify-center rounded-full border border-white/60 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
             >
-              {isArabic ? "مراجعة الجلسات" : "Review Sessions"}
+              {t("dashboard.student.hero.ctaReview")}
             </Link>
           </div>
         </div>
@@ -171,20 +163,14 @@ function extractFirstName(name: string | null, isArabic: boolean) {
 
 function getGreeting(language: "en" | "ar") {
   const omanHour = (new Date().getUTCHours() + OMAN_UTC_OFFSET + 24) % 24;
-  const key =
-    omanHour < 12 ? "morning" : omanHour < 18 ? "afternoon" : "evening";
   if (language === "ar") {
-    return key === "morning"
-      ? "صباح الخير"
-      : key === "afternoon"
-        ? "مساء الخير"
-        : "مساء سعيد";
+    if (omanHour < 12) return "صباح الخير";
+    if (omanHour < 18) return "مساء الخير";
+    return "مساء سعيد";
   }
-  return key === "morning"
-    ? "Good morning"
-    : key === "afternoon"
-      ? "Good afternoon"
-      : "Good evening";
+  if (omanHour < 12) return "Good morning";
+  if (omanHour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 function nextSessionDescription(
@@ -200,18 +186,18 @@ function nextSessionDescription(
 
 function noSessionDescription(language: "en" | "ar") {
   return language === "ar"
-    ? "لا توجد جلسات مجدولة. احجز جلستك القادمة للحفاظ على زخم التعلم."
+    ? "لا توجد جلسات مجدولة. احجز معلمك القادم للحفاظ على زخم التعلم."
     : "You have no sessions scheduled. Book your next tutor to keep learning momentum.";
 }
 
 function pendingDescription(count: number, language: "en" | "ar") {
   if (count > 0) {
     return language === "ar"
-      ? `لديك ${count} طلب${count === 1 ? "" : "ًا"} قيد التأكيد.`
+      ? `لديك ${count} طلب بانتظار التأكيد.`
       : `${count} request${count === 1 ? "" : "s"} awaiting confirmation.`;
   }
   return language === "ar"
-    ? "لا توجد طلبات معلقة."
+    ? "تمت معالجة جميع الطلبات."
     : "All requests are cleared.";
 }
 
@@ -220,11 +206,13 @@ function buildMomentumCards({
   nextSession,
   pendingCount,
   stats,
+  t,
 }: {
   language: "en" | "ar";
   nextSession: BookingWithTutor | null;
   pendingCount: number;
   stats: StudentStats;
+  t: (key: string) => string;
 }) {
   const locale = language === "ar" ? "ar-SA" : "en-US";
   const nextSessionTime = nextSession
@@ -235,74 +223,60 @@ function buildMomentumCards({
       }).format(new Date(nextSession.startAt))
     : null;
 
-  const cards = [
+  return [
     {
-      title: language === "ar" ? "القادم في جدولك" : "Next on your calendar",
+      title: t("dashboard.student.cards.next"),
       description: nextSession
         ? language === "ar"
           ? `${nextSession.subject} مع ${nextSession.tutor.name || "معلمك"}`
           : `${nextSession.subject} with ${nextSession.tutor.name || "your tutor"}`
-        : language === "ar"
-          ? "لا توجد جلسات قادمة."
-          : "No upcoming sessions scheduled.",
+        : t("dashboard.student.cards.nextEmpty"),
       detail: nextSession
         ? nextSessionTime
         : language === "ar"
-          ? "استخدم الإجراءات السريعة لحجز جلستك القادمة."
+          ? "استخدم الإجراءات السريعة لحجز جلستك التالية."
           : "Use quick actions to book your next study block.",
       icon: CalendarClock,
       link: nextSession ? `/bookings/${nextSession.id}` : "/tutors",
       linkLabel: nextSession
-        ? language === "ar"
-          ? "عرض الحجز"
-          : "View booking"
-        : language === "ar"
-          ? "استعراض المعلمين"
-          : "Browse tutors",
+        ? t("dashboard.student.cards.viewBooking")
+        : t("dashboard.student.cards.browseTutors"),
     },
     {
-      title: language === "ar" ? "طلبات في الانتظار" : "Pending approvals",
+      title: t("dashboard.student.cards.pending"),
       description:
         pendingCount > 0
           ? language === "ar"
-            ? `لديك ${pendingCount} طلب بانتظار الرد.`
-            : `You have ${pendingCount} request${
-                pendingCount === 1 ? "" : "s"
-              } waiting for confirmation.`
-          : language === "ar"
-            ? "تمت الموافقة على جميع الطلبات."
-            : "All session requests are confirmed.",
+            ? `لديك ${pendingCount} طلب بانتظار التأكيد.`
+            : `You have ${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting for confirmation.`
+          : t("dashboard.student.cards.pendingClear"),
       detail:
         pendingCount > 0
           ? language === "ar"
-            ? "سنخطرك فور رد المعلمين."
+            ? "سنُعلمك بمجرد رد المعلمين."
             : "We’ll notify you as soon as your tutors respond."
           : language === "ar"
             ? "يمكنك طلب المزيد من الجلسات في أي وقت."
             : "Feel free to request more sessions anytime.",
       icon: BellRing,
       link: "/dashboard/student#sessions",
-      linkLabel:
-        language === "ar" ? "إدارة الطلبات" : "Manage requests",
+      linkLabel: t("dashboard.student.cards.manageRequests"),
     },
     {
-      title: language === "ar" ? "سلسلة التعلم" : "Learning streak",
+      title: t("dashboard.student.cards.streak"),
       description:
         language === "ar"
-          ? `${stats.completedCount} جلسة مكتملة و ${stats.totalHours} ساعة مسجلة حتى الآن.`
+          ? `${stats.completedCount} جلسات مكتملة مع ${stats.totalHours} ساعات تعلم مسجلة.`
           : `${stats.completedCount} sessions completed with ${stats.totalHours} study hours logged so far.`,
       detail:
         language === "ar"
-          ? "أضف مزيدًا من الجلسات للحفاظ على تقدمك."
+          ? "أضف المزيد من الجلسات للحفاظ على تقدمك."
           : "Add more sessions to keep your streak growing.",
       icon: Target,
       link: "/dashboard/student/bookings",
-      linkLabel:
-        language === "ar" ? "سجل الجلسات" : "View history",
+      linkLabel: t("dashboard.student.cards.viewHistory"),
     },
   ];
-
-  return cards;
 }
 
 function getRelativeTime(

@@ -13,7 +13,9 @@ interface MobileFiltersProps {
 }
 
 export function MobileFilters({ searchParams }: MobileFiltersProps) {
-    const activeFilterCount = Object.values(searchParams).filter(Boolean).length;
+    const activeFilterCount = Object.entries(searchParams).filter(
+        ([key, value]) => key !== "page" && Boolean(value)
+    ).length;
 
     return (
         <Sheet>
