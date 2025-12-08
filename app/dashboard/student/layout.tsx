@@ -3,6 +3,8 @@ import type { ReactNode } from "react"
 import { DashboardNavigation } from "@/components/dashboard-navigation"
 
 const studentLinks = [
+  { href: "/", labelKey: "nav.home" },
+  { href: "/about", labelKey: "nav.about" },
   { href: "/dashboard/student", labelKey: "dashboard.nav.dashboard" },
   { href: "/dashboard/student#sessions", labelKey: "dashboard.nav.sessions" },
   { href: "/dashboard/student/settings", labelKey: "dashboard.nav.settings" },

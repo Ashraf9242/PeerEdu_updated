@@ -38,6 +38,13 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
     void signOut({ callbackUrl: "/" })
   }
 
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/"
+    }
+    return pathname?.startsWith(href)
+  }
+
   const renderLinks = (className: string, onClick?: () => void) =>
     links.map((link) => (
       <Link
@@ -45,7 +52,7 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
         href={link.href}
         onClick={onClick}
         className={`${className} ${
-          pathname?.startsWith(link.href) ? "text-primary" : "text-foreground"
+          isActive(link.href) ? "text-primary" : "text-foreground"
         }`}
       >
         {t(link.labelKey)}

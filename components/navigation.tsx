@@ -10,12 +10,18 @@ import { NotificationBell } from "@/components/notification-bell"
 import { Menu, X } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
+import { useSession } from "next-auth/react"
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { t } = useLanguage()
   const { resolvedTheme } = useTheme()
+  const { data: session, status } = useSession()
+  const isAuthenticated = status === "authenticated"
+  const profileHref = session?.user?.role
+    ? `/dashboard/${session.user.role.toLowerCase()}`
+    : "/dashboard"
 
   useEffect(() => {
     setMounted(true)
@@ -48,12 +54,26 @@ export function Navigation() {
             <Link href="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               {t("nav.about")}
             </Link>
-            <Link href="/login" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              {t("nav.login")}
-            </Link>
-            <Link href="/register" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              {t("nav.register")}
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href={profileHref}
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                {t("nav.profile")}
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                  {t("nav.login")}
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  {t("nav.register")}
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Theme and Language Controls */}
@@ -87,20 +107,32 @@ export function Navigation() {
               >
                 {t("nav.about")}
               </Link>
-              <Link
-                href="/login"
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t("nav.login")}
-              </Link>
-              <Link
-                href="/register"
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t("nav.register")}
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  href={profileHref}
+                  className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t("nav.profile")}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t("nav.login")}
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t("nav.register")}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
