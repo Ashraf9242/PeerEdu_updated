@@ -10,6 +10,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/contexts/language-context"
 import { AvailabilityManager } from "@/components/availability-manager"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { UNIVERSITY_OPTIONS } from "@/lib/universities"
 
 type Subject = {
   name: string
@@ -29,12 +37,28 @@ export function SubjectRegistrationCard() {
     grade: "",
   })
 
+  const universityOptions = UNIVERSITY_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  })).sort((a, b) => a.label.localeCompare(b.label))
+  const universityLabelMap = universityOptions.reduce<Record<string, string>>(
+    (acc, option) => {
+      acc[option.value] = option.label
+      return acc
+    },
+    {},
+  )
+
   const handleChange = (field: keyof Subject, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (!formState.college) {
+      toast.error(t("register.placeholder.university"))
+      return
+    }
     setIsSaving(true)
 
     setTimeout(() => {
@@ -46,10 +70,15 @@ export function SubjectRegistrationCard() {
   }
 
   return (
-    <Card className="lg:col-span-2">
+    <Card className="lg:col-span-3" id="subjects">
       <CardHeader>
         <CardTitle>{t("dashboard.teacher.subjectFormTitle")}</CardTitle>
-        <CardDescription>{t("dashboard.teacher.subjectFormSubtitle")}</CardDescription>
+        <CardDescription className="space-y-1">
+          <span>{t("dashboard.teacher.subjectFormSubtitle")}</span>
+          <span className="block text-xs text-muted-foreground">
+            {t("dashboard.teacher.subjectApprovalNote")}
+          </span>
+        </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6">
@@ -83,12 +112,21 @@ export function SubjectRegistrationCard() {
               <Label htmlFor="college">
                 {t("dashboard.teacher.college")} <span className="text-primary">*</span>
               </Label>
-              <Input
-                id="college"
-                required
+              <Select
                 value={formState.college}
-                onChange={(event) => handleChange("college", event.target.value)}
-              />
+                onValueChange={(value) => handleChange("college", value)}
+              >
+                <SelectTrigger id="college">
+                  <SelectValue placeholder={t("register.placeholder.university")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {universityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="grade">
@@ -127,7 +165,8 @@ export function SubjectRegistrationCard() {
                     <div className="text-left">
                       <p className="font-semibold text-xs">{subject.name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        {subject.code} • {subject.grade} • {subject.college}
+                        {subject.code} • {subject.grade} •{" "}
+                        {universityLabelMap[subject.college] || subject.college}
                       </p>
                     </div>
                   </Badge>

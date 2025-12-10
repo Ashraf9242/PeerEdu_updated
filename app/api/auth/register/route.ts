@@ -5,7 +5,8 @@ import { z } from "zod"
 
 import { db } from "@/lib/db"
 
-const registerSchema = z.object({
+const registerSchema = z
+  .object({
   role: z.enum(["student", "teacher"]),
   firstName: z.string().min(2, "First name is required"),
   middleName: z.string().optional(),
@@ -24,11 +25,32 @@ const registerSchema = z.object({
   agreeToTerms: z.literal("true", {
     errorMap: () => ({ message: "You must agree to the terms of service." }),
   }),
+  gradeProof: z.instanceof(File).optional(),
+  gradeAuthentic: z.string().optional(),
+  gradeIdentity: z.string().optional(),
 })
+  .superRefine((data, ctx) => {
+    if (data.role === "teacher") {
+      if (!data.gradeProof || data.gradeProof.size === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A grade report is required for teachers.",
+        })
+      }
+      if (data.gradeAuthentic !== "true" || data.gradeIdentity !== "true") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please confirm the authenticity of your grade report.",
+        })
+      }
+    }
+  })
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
+
+    const gradeProof = formData.get("gradeProof")
 
     const parsed = registerSchema.parse({
       role: formData.get("role"),
@@ -42,6 +64,9 @@ export async function POST(req: Request) {
       password: formData.get("password"),
       confirmPassword: formData.get("confirmPassword"),
       agreeToTerms: formData.get("agreeToTerms"),
+      gradeProof: gradeProof instanceof File ? gradeProof : undefined,
+      gradeAuthentic: formData.get("gradeAuthentic")?.toString(),
+      gradeIdentity: formData.get("gradeIdentity")?.toString(),
     })
 
     if (parsed.password !== parsed.confirmPassword) {

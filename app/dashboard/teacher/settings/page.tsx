@@ -25,7 +25,7 @@ export default async function TeacherSettingsPage() {
         subtitle="Fine tune your teaching profile and keep your expertise front and center."
       />
 
-      <div className="grid gap-8 lg:grid-cols-5">
+      <div className="grid gap-8 lg:grid-cols-7">
         <TeacherProfileSettingsCard
           teacher={{
             firstName: teacher?.firstName ?? sessionUser.name ?? "",
@@ -35,7 +35,7 @@ export default async function TeacherSettingsPage() {
             email: teacher?.email ?? sessionUser.email ?? "teacher@peeredu.com",
           }}
         />
-        <div className="space-y-8 lg:col-span-2">
+        <div className="space-y-8 lg:col-span-3">
           <SubjectRegistrationCard />
           <Card>
             <CardHeader>

@@ -21,7 +21,7 @@ export async function getTeacherDashboardData(teacherId: string) {
   });
 
   const tutorProfile = await db.tutorProfile.findUnique({
-      where: { userId: teacherId }
+    where: { userId: teacherId },
   });
 
   const pending = bookings.filter(b => b.status === 'PENDING');
@@ -50,6 +50,7 @@ export async function getTeacherDashboardData(teacherId: string) {
       ratingAvg: tutorProfile?.ratingAvg || 0,
       projectedEarnings,
     },
+    subjects: tutorProfile?.subjects ?? [],
     pendingRequests: pending,
     upcomingSessions: confirmed,
     chartData,

@@ -86,6 +86,13 @@ function RegisterForm() {
     confirmPassword: "",
     agreeToTerms: false,
   })
+  const [gradeProof, setGradeProof] = useState<File | null>(null)
+  const [gradeProofName, setGradeProofName] = useState<string | null>(null)
+  const [gradeConfirmations, setGradeConfirmations] = useState({
+    authentic: false,
+    identity: false,
+  })
+  const isTeacher = formData.role === "teacher"
 
   type RequiredFieldKey =
     | "firstName"
@@ -140,6 +147,17 @@ function RegisterForm() {
       }
     }
 
+    if (isTeacher) {
+      if (!gradeProof) {
+        toast.error("Please upload a grade report for verification.")
+        return false
+      }
+      if (!gradeConfirmations.authentic || !gradeConfirmations.identity) {
+        toast.error("Please confirm the authenticity of your grade report.")
+        return false
+      }
+    }
+
     return true
   }
 
@@ -174,6 +192,11 @@ function RegisterForm() {
       payload.append("password", formData.password)
       payload.append("confirmPassword", formData.confirmPassword)
       payload.append("agreeToTerms", String(formData.agreeToTerms))
+      if (isTeacher && gradeProof) {
+        payload.append("gradeProof", gradeProof)
+        payload.append("gradeAuthentic", String(gradeConfirmations.authentic))
+        payload.append("gradeIdentity", String(gradeConfirmations.identity))
+      }
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -199,6 +222,17 @@ function RegisterForm() {
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleGradeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      setGradeProof(null)
+      setGradeProofName(null)
+      return
+    }
+    setGradeProof(file)
+    setGradeProofName(file.name)
   }
 
   const containerClass =
@@ -349,6 +383,56 @@ function RegisterForm() {
            </SelectContent>
         </Select>
       </div>
+
+      {isTeacher && (
+        <div className="space-y-4 rounded-xl border border-primary/30 bg-background/80 p-4 shadow-sm">
+          <div className="space-y-2">
+            <Label htmlFor="gradeProof">
+              {t("register.gradeUpload")}
+            </Label>
+            <Input
+              id="gradeProof"
+              type="file"
+              accept="application/pdf,image/*"
+              className="bg-background"
+              onChange={handleGradeUpload}
+            />
+            <p className="text-xs text-muted-foreground">{t("register.gradeUpload.helper")}</p>
+            {gradeProofName && (
+              <p className="text-xs text-primary">{t("register.gradeUpload.selected")}: {gradeProofName}</p>
+            )}
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="gradeAuthentic"
+                checked={gradeConfirmations.authentic}
+                onCheckedChange={(checked) =>
+                  setGradeConfirmations((prev) => ({ ...prev, authentic: Boolean(checked) }))
+                }
+              />
+              <Label htmlFor="gradeAuthentic" className="text-sm leading-tight">
+                {t("register.checkbox.gradeAuthentic")}
+              </Label>
+            </div>
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="gradeIdentity"
+                checked={gradeConfirmations.identity}
+                onCheckedChange={(checked) =>
+                  setGradeConfirmations((prev) => ({ ...prev, identity: Boolean(checked) }))
+                }
+              />
+              <Label htmlFor="gradeIdentity" className="text-sm leading-tight">
+                {t("register.checkbox.gradeIdentity")}
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("register.checkbox.reportDetails")}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Password */}
       <div className="space-y-2">

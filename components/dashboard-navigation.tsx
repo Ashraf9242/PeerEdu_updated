@@ -38,6 +38,11 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
     void signOut({ callbackUrl: "/" })
   }
 
+  const isTeacherSettings = pathname?.startsWith("/dashboard/teacher/settings") ?? false
+  const navClasses = isTeacherSettings
+    ? "sticky top-0 z-40 border-b bg-white shadow-sm"
+    : "sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+
   const isActive = (href: string) => {
     if (href === "/") {
       return pathname === "/"
@@ -60,7 +65,7 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
     ))
 
   return (
-    <nav className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className={navClasses}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
@@ -88,9 +93,14 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
 
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <LanguageSwitcher />
+            {!isTeacherSettings && <LanguageSwitcher />}
             <NotificationBell />
-            <Button variant="outline" size="sm" onClick={handleLogout}>
+            <Button
+              variant={isTeacherSettings ? "destructive" : "outline"}
+              size="sm"
+              className={isTeacherSettings ? "font-semibold" : undefined}
+              onClick={handleLogout}
+            >
               {t("dashboard.nav.logout")}
             </Button>
             <Button
