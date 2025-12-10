@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,12 +31,15 @@ export function SubjectRegistrationCard() {
   const { t } = useLanguage()
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const gradeProofInputRef = useRef<HTMLInputElement | null>(null)
   const [formState, setFormState] = useState<Subject>({
     name: "",
     code: "",
     college: "",
     grade: "",
   })
+  const [gradeProof, setGradeProof] = useState<File | null>(null)
+  const [gradeProofName, setGradeProofName] = useState<string | null>(null)
   const [verificationChecks, setVerificationChecks] = useState({
     identityConfirmed: false,
     gradeConfirmed: false,
@@ -58,10 +61,20 @@ export function SubjectRegistrationCard() {
     setFormState((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleGradeProofUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null
+    setGradeProof(file)
+    setGradeProofName(file ? file.name : null)
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!formState.college) {
       toast.error(t("register.placeholder.university"))
+      return
+    }
+    if (!gradeProof) {
+      toast.error(t("dashboard.teacher.gradeProof.error"))
       return
     }
     if (!verificationChecks.identityConfirmed || !verificationChecks.gradeConfirmed) {
@@ -73,6 +86,11 @@ export function SubjectRegistrationCard() {
     setTimeout(() => {
       setSubjects((prev) => [...prev, formState])
       setFormState({ name: "", code: "", college: "", grade: "" })
+      setGradeProof(null)
+      setGradeProofName(null)
+      if (gradeProofInputRef.current) {
+        gradeProofInputRef.current.value = ""
+      }
       setVerificationChecks({ identityConfirmed: false, gradeConfirmed: false })
       setIsSaving(false)
       toast.success(t("dashboard.teacher.subjectAdded"))
@@ -153,10 +171,29 @@ export function SubjectRegistrationCard() {
           </div>
 
           <div className="space-y-2">
-            <Label>Weekly availability</Label>
-            <p className="text-sm text-muted-foreground">
-              Set the time slots students can book with you.
+            <Label htmlFor="grade-proof">
+              {t("dashboard.teacher.gradeProof")} <span className="text-primary">*</span>
+            </Label>
+            <Input
+              ref={gradeProofInputRef}
+              id="grade-proof"
+              type="file"
+              accept="application/pdf,image/*"
+              onChange={handleGradeProofUpload}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.teacher.gradeProof.helper")}
             </p>
+            {gradeProofName && (
+              <p className="text-xs text-primary">
+                {t("dashboard.teacher.gradeProof.selected")}: {gradeProofName}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("dashboard.teacher.availabilityTitle")}</Label>
+            <p className="text-sm text-muted-foreground">{t("dashboard.teacher.availabilityHelper")}</p>
             <AvailabilityManager
               tutorId="teacher-planning"
               initialAvailabilities={[]}

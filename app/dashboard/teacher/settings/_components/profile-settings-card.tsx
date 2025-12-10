@@ -88,7 +88,13 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
             <div className="flex flex-col items-center gap-3">
               <div className={cn("relative h-24 w-24 overflow-hidden rounded-full bg-white/40 shadow-inner", photoPreview && "ring-4 ring-primary/40")}>
                 {photoPreview ? (
-                  <Image src={photoPreview} alt="Teacher avatar" fill sizes="96px" className="object-cover" />
+                  <Image
+                    src={photoPreview}
+                    alt={t("dashboard.teacher.photoAlt")}
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-sm text-primary">
                     {formState.firstName?.[0] || "T"}
@@ -140,14 +146,11 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
                 <SelectTrigger id="prefix">
                   <SelectValue placeholder={t("dashboard.teacher.prefixPlaceholder")} />
                 </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Mr.">Mr.</SelectItem>
-                <SelectItem value="Ms.">Ms.</SelectItem>
-              </SelectContent>
+                <SelectContent>
+                  <SelectItem value="Mr.">Mr.</SelectItem>
+                  <SelectItem value="Ms.">Ms.</SelectItem>
+                </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                {t("dashboard.teacher.prefixHelper")}
-              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="firstName">
