@@ -4,11 +4,12 @@
 import { db } from "@/lib/db";
 import { Prisma, Role } from "@prisma/client";
 import { SearchParams } from "../_lib/types";
+import { UNIVERSITY_VALUE_TO_NAME } from "@/lib/universities";
 
 const PAGE_SIZE = 12;
 
 export async function getTutors(searchParams: SearchParams) {
-  const { q, university, subjects, sort, page = "1" } = searchParams;
+  const { university, subjectCode, subjectName, teacherName, page = "1" } = searchParams;
 
   const currentPage = parseInt(page, 10) || 1;
   const skip = (currentPage - 1) * PAGE_SIZE;
@@ -17,42 +18,61 @@ export async function getTutors(searchParams: SearchParams) {
     isApproved: true,
   };
 
+  const tutorProfileFilters: Prisma.TutorProfileWhereInput[] = [];
+
+  if (subjectCode?.trim()) {
+    const trimmed = subjectCode.trim();
+    const upper = trimmed.toUpperCase();
+    const codeOptions = Array.from(new Set([trimmed, upper]));
+    tutorProfileFilters.push({
+      OR: codeOptions.map((code) => ({ subjects: { has: code } })),
+    });
+  }
+
+  if (subjectName?.trim()) {
+    const trimmed = subjectName.trim();
+    tutorProfileFilters.push({ subjects: { has: trimmed } });
+  }
+
+  if (tutorProfileFilters.length > 0) {
+    tutorProfileWhere.AND = tutorProfileFilters;
+  }
+
   const where: Prisma.UserWhereInput = {
     role: Role.TEACHER,
     tutorProfile: { is: tutorProfileWhere },
   };
 
-  const orderBy: Prisma.UserOrderByWithRelationInput = {};
+  const userFilters: Prisma.UserWhereInput[] = [];
 
-  // Filters
-  if (q) {
-    where.OR = [
-      { firstName: { contains: q, mode: 'insensitive' } },
-      { familyName: { contains: q, mode: 'insensitive' } },
-      { tutorProfile: { is: { subjects: { has: q } } } },
-    ];
+  if (university?.trim()) {
+    const trimmed = university.trim();
+    const mapped = UNIVERSITY_VALUE_TO_NAME[trimmed] ?? trimmed;
+    const values = Array.from(new Set([trimmed, mapped]));
+    userFilters.push({
+      OR: values.map((value) => ({ university: value })),
+    });
   }
-  if (university) {
-    where.university = university;
+
+  if (teacherName?.trim()) {
+    const trimmed = teacherName.trim();
+    userFilters.push({
+      OR: [
+        { firstName: { contains: trimmed, mode: "insensitive" } },
+        { middleName: { contains: trimmed, mode: "insensitive" } },
+        { familyName: { contains: trimmed, mode: "insensitive" } },
+        { name: { contains: trimmed, mode: "insensitive" } },
+      ],
+    });
   }
-  if (subjects) {
-    const subjectList = subjects.split(',');
-    tutorProfileWhere.subjects = { hasSome: subjectList };
+
+  if (userFilters.length > 0) {
+    where.AND = userFilters;
   }
-  // Sorting
-  switch (sort) {
-    case "rating":
-      orderBy.tutorProfile = { ratingAvg: "desc" };
-      break;
-    case "price":
-      orderBy.tutorProfile = { hourlyRate: "asc" };
-      break;
-    case "experience":
-      orderBy.tutorProfile = { experience: "desc" };
-      break;
-    default:
-      orderBy.tutorProfile = { ratingAvg: "desc" };
-  }
+
+  const orderBy: Prisma.UserOrderByWithRelationInput = {
+    tutorProfile: { ratingAvg: "desc" },
+  };
 
   try {
     const [tutors, totalTutors] = await db.$transaction([

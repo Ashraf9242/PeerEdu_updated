@@ -18,6 +18,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useLanguage } from "@/contexts/language-context"
+import { UNIVERSITY_OPTIONS } from "@/lib/universities"
 
 export default function RegisterPage() {
   const { t } = useLanguage()
@@ -61,6 +62,13 @@ export default function RegisterPage() {
 function RegisterForm() {
   const { t } = useLanguage()
   const router = useRouter()
+
+  const universityOptions = [...UNIVERSITY_OPTIONS]
+    .map((option) => ({
+      value: option.value,
+      label: t(option.labelKey),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label))
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -311,23 +319,11 @@ function RegisterForm() {
               <SelectValue placeholder={t("register.placeholder.university")} />
             </SelectTrigger>
             <SelectContent>
-              {[
-                { value: "squ", label: t("register.university.squ") },
-                { value: "dhofar-university", label: t("register.university.dhofar") },
-                { value: "german-university", label: t("register.university.german") },
-                { value: "muscat-university", label: t("register.university.muscat") },
-                { value: "nizwa-university", label: t("register.university.nizwa") },
-                { value: "oman-university", label: t("register.university.oman") },
-                { value: "utas-ibri", label: t("register.university.utas.ibri") },
-                { value: "utas-muscat", label: t("register.university.utas.muscat") },
-                { value: "utas-nizwa", label: t("register.university.utas.nizwa") },
-                { value: "utas-salalah", label: t("register.university.utas.salalah") },
-                { value: "utas-sohar", label: t("register.university.utas.sohar") },
-              ]
-                .sort((a, b) => a.label.localeCompare(b.label))
-                .map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
+              {universityOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

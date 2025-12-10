@@ -4,6 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useLanguage } from "@/contexts/language-context";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -14,6 +15,7 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -30,7 +32,7 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
         disabled={currentPage <= 1}
       >
         <ChevronLeft className="h-4 w-4" />
-        <span className="sr-only">Previous Page</span>
+        <span className="sr-only">{t("tutors.pagination.prev")}</span>
       </Button>
       <Button
         variant="outline"
@@ -39,7 +41,7 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
         disabled={currentPage >= totalPages}
       >
         <ChevronRight className="h-4 w-4" />
-        <span className="sr-only">Next Page</span>
+        <span className="sr-only">{t("tutors.pagination.next")}</span>
       </Button>
     </div>
   );

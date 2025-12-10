@@ -1,18 +1,16 @@
-
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-import { getFilterData } from "../_actions/get-filter-data";
 import { SearchParams } from "../_lib/types";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { MultiSelect } from "./multi-select";
+import { useLanguage } from "@/contexts/language-context";
+import { UNIVERSITY_NAME_TO_VALUE, UNIVERSITY_OPTIONS } from "@/lib/universities";
 
 interface FiltersSidebarProps {
   searchParams: SearchParams;
@@ -23,15 +21,20 @@ export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps)
   const router = useRouter();
   const pathname = usePathname();
   const [, startTransition] = useTransition();
+  const { t } = useLanguage();
 
-  const [filterData, setFilterData] = useState<{ universities: string[]; subjects: string[] }>({
-    universities: [],
-    subjects: [],
-  });
-
-  useEffect(() => {
-    getFilterData().then(setFilterData);
-  }, []);
+  const rawUniversity = searchParams.university?.trim();
+  const normalizedUniversityValue = (() => {
+    if (!rawUniversity) return "all";
+    if (UNIVERSITY_OPTIONS.some((option) => option.value === rawUniversity)) {
+      return rawUniversity;
+    }
+    return (
+      UNIVERSITY_NAME_TO_VALUE[rawUniversity] ??
+      UNIVERSITY_NAME_TO_VALUE[rawUniversity.toLowerCase()] ??
+      "all"
+    );
+  })();
 
   const createQueryString = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
@@ -42,7 +45,6 @@ export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps)
         params.delete(key);
       }
     });
-    // Reset page on filter change
     params.delete("page");
     return params.toString();
   };
@@ -53,91 +55,85 @@ export function FiltersSidebar({ searchParams, className }: FiltersSidebarProps)
     });
   };
 
-  const handleDebouncedUpdate = useDebouncedCallback(handleUpdate, 500);
+  const handleDebouncedUpdate = useDebouncedCallback(
+    (updates: Record<string, string | null>) => {
+      handleUpdate(
+        Object.entries(updates).reduce<Record<string, string | null>>((acc, [key, value]) => {
+          if (typeof value === "string") {
+            const trimmed = value.trim();
+            acc[key] = trimmed.length ? trimmed : null;
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        }, {}),
+      );
+    },
+    400,
+  );
 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Refine Tutors</CardTitle>
-        <p className="text-sm text-muted-foreground mt-2">
-          Start with your college or university, then narrow in by subject code.
-        </p>
+        <CardTitle>{t("tutors.filters.title")}</CardTitle>
+        <p className="mt-1 text-sm text-muted-foreground">{t("tutors.filters.description")}</p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* University */}
+      <CardContent className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="university">College / University</Label>
+          <Label htmlFor="university">{t("tutors.filters.university")}</Label>
           <Select
-            value={searchParams.university}
+            value={normalizedUniversityValue}
             onValueChange={(value) => handleUpdate({ university: value === "all" ? null : value })}
           >
             <SelectTrigger id="university">
-              <SelectValue placeholder="All institutions" />
+              <SelectValue placeholder={t("tutors.filters.university.placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All institutions</SelectItem>
-              {filterData.universities.map((uni) => (
-                <SelectItem key={uni} value={uni}>
-                  {uni}
+              <SelectItem value="all">{t("tutors.filters.university.placeholder")}</SelectItem>
+              {UNIVERSITY_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {t(option.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
-            We verify every tutor with their university before they go live.
-          </p>
         </div>
 
-        {/* Subjects */}
         <div className="space-y-2">
-          <Label>Subject code</Label>
-          <MultiSelect
-            options={filterData.subjects.map((s) => ({ value: s, label: s }))}
-            selected={searchParams.subjects?.split(",") || []}
-            onChange={(selected) => handleUpdate({ subjects: selected.join(",") || null })}
-            placeholder="e.g., MATH210, BUSN101…"
-          />
-          <p className="text-xs text-muted-foreground">
-            Add one or more codes to see tutors who teach them.
-          </p>
-        </div>
-
-        {/* Search Input */}
-        <div className="space-y-2">
-          <Label htmlFor="search">Search tutors</Label>
+          <Label htmlFor="subjectCode">{t("tutors.filters.subjectCode")}</Label>
           <Input
-            id="search"
-            placeholder="Try a tutor name or keyword"
-            defaultValue={searchParams.q}
-            onChange={(e) => handleDebouncedUpdate({ q: e.target.value })}
+            id="subjectCode"
+            placeholder={t("tutors.filters.subjectCode.placeholder")}
+            defaultValue={searchParams.subjectCode || ""}
+            onChange={(event) => handleDebouncedUpdate({ subjectCode: event.target.value.toUpperCase() })}
           />
         </div>
 
-        {/* Sort By */}
         <div className="space-y-2">
-          <Label htmlFor="sort">Sort results</Label>
-          <Select
-            value={searchParams.sort || "rating"}
-            onValueChange={(value) => handleUpdate({ sort: value })}
-          >
-            <SelectTrigger id="sort">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rating">Best match</SelectItem>
-              <SelectItem value="price">Lowest hourly rate</SelectItem>
-              <SelectItem value="experience">Most experienced</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="subjectName">{t("tutors.filters.subjectName")}</Label>
+            <span className="text-xs text-muted-foreground">{t("tutors.filters.optional")}</span>
+          </div>
+          <Input
+            id="subjectName"
+            placeholder={t("tutors.filters.subjectName.placeholder")}
+            defaultValue={searchParams.subjectName || ""}
+            onChange={(event) => handleDebouncedUpdate({ subjectName: event.target.value })}
+          />
         </div>
 
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => router.push(pathname)}
-        >
-          Clear All Filters
-        </Button>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="teacherName">{t("tutors.filters.teacherName")}</Label>
+            <span className="text-xs text-muted-foreground">{t("tutors.filters.optional")}</span>
+          </div>
+          <Input
+            id="teacherName"
+            placeholder={t("tutors.filters.teacherName.placeholder")}
+            defaultValue={searchParams.teacherName || ""}
+            onChange={(event) => handleDebouncedUpdate({ teacherName: event.target.value })}
+          />
+        </div>
       </CardContent>
     </Card>
   );

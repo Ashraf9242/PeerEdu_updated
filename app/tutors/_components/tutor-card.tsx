@@ -1,4 +1,6 @@
 
+"use client";
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Star } from "lucide-react";
 
 import { TutorsWithProfile } from "../_actions/get-tutors";
+import { useLanguage } from "@/contexts/language-context";
 
 interface TutorCardProps {
   tutor: TutorsWithProfile[0];
@@ -20,6 +23,7 @@ const omrFormatter = new Intl.NumberFormat("en-OM", {
 
 export function TutorCard({ tutor }: TutorCardProps) {
   const { tutorProfile } = tutor;
+  const { t } = useLanguage();
 
   if (!tutorProfile) {
     return null;
@@ -62,23 +66,25 @@ export function TutorCard({ tutor }: TutorCardProps) {
             <span className="font-bold text-primary">
               {Number(tutorProfile.ratingAvg ?? 0).toFixed(1)}
             </span>
-            <span>({tutorProfile.ratingCount} reviews)</span>
+            <span>
+              ({tutorProfile.ratingCount} {t("tutor.card.reviews")})
+            </span>
           </div>
           <div className="text-right">
             <span className="font-bold text-lg text-primary">{hourlyRate}</span>
-            <span className="ml-1 text-xs">/hour</span>
+            <span className="ml-1 text-xs">{t("tutor.card.perHour")}</span>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Based on {tutorProfile.ratingCount} completed sessions.
+          {t("tutor.card.sessionSummary.prefix")} {tutorProfile.ratingCount} {t("tutor.card.sessionSummary.suffix")}
         </p>
       </CardContent>
       <CardFooter className="grid grid-cols-2 gap-2">
         <Button variant="outline" asChild>
-          <Link href={`/tutors/${tutor.id}`}>View Profile</Link>
+          <Link href={`/tutors/${tutor.id}`}>{t("tutor.card.viewProfile")}</Link>
         </Button>
         <Button asChild>
-          <Link href={`/booking/${tutor.id}`}>Book Now</Link>
+          <Link href={`/booking/${tutor.id}`}>{t("tutor.card.bookNow")}</Link>
         </Button>
       </CardFooter>
     </Card>

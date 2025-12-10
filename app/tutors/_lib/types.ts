@@ -1,8 +1,8 @@
 
 export type SearchParams = {
-  q?: string;
   university?: string;
-  subjects?: string;
-  sort?: "rating" | "price" | "experience";
+  subjectCode?: string;
+  subjectName?: string;
+  teacherName?: string;
   page?: string;
 };
