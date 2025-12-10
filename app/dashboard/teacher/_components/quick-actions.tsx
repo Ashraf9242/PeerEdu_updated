@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link"
-import { BarChart2, Calendar, User, LayoutGrid, Settings } from "lucide-react"
+import { BarChart2, Calendar, LayoutGrid, Settings } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,31 +20,25 @@ export function QuickActions() {
         <Button asChild className="w-full justify-start" variant="ghost">
           <Link href="/dashboard/teacher/settings">
             <Settings className="mr-2 h-4 w-4" />
-            {t("dashboard.nav.settings")}
-          </Link>
-        </Button>
-        <Button asChild className="w-full justify-start" variant="ghost">
-          <Link href="/profile/teacher">
-            <User className="mr-2 h-4 w-4" />
-            {t("dashboard.manageProfile")}
+            {t("dashboard.teacher.quickActions.settings")}
           </Link>
         </Button>
         <Button asChild className="w-full justify-start" variant="ghost">
           <Link href="/profile/teacher/availability">
             <Calendar className="mr-2 h-4 w-4" />
-            Manage Availability
+            {t("dashboard.teacher.quickActions.availability")}
           </Link>
         </Button>
         <Button asChild className="w-full justify-start" variant="ghost">
           <Link href="/dashboard/teacher/sessions">
             <LayoutGrid className="mr-2 h-4 w-4" />
-            View All Sessions
+            {t("dashboard.teacher.quickActions.sessions")}
           </Link>
         </Button>
         <Button asChild className="w-full justify-start" variant="ghost">
           <Link href="/dashboard/teacher/analytics">
             <BarChart2 className="mr-2 h-4 w-4" />
-            Detailed Analytics
+            {t("dashboard.teacher.quickActions.analytics")}
           </Link>
         </Button>
       </CardContent>

@@ -118,6 +118,10 @@ const translations = {
     "dashboard.teacher.subjectSubmit": "Add subject",
     "dashboard.teacher.subjectAdded": "Subject added to your profile",
     "dashboard.teacher.quickActions": "Quick Actions",
+    "dashboard.teacher.quickActions.settings": "Settings",
+    "dashboard.teacher.quickActions.availability": "Manage Availability",
+    "dashboard.teacher.quickActions.sessions": "View All Sessions",
+    "dashboard.teacher.quickActions.analytics": "Detailed Analytics",
 
     // Hero Section
     "hero.title": "Connect. Learn. Excel.",
@@ -554,6 +558,10 @@ const translations = {
     "dashboard.teacher.subjectSubmit": "إضافة المادة",
     "dashboard.teacher.subjectAdded": "تمت إضافة المادة إلى ملفك",
     "dashboard.teacher.quickActions": "إجراءات سريعة",
+    "dashboard.teacher.quickActions.settings": "الإعدادات",
+    "dashboard.teacher.quickActions.availability": "إدارة التوفر",
+    "dashboard.teacher.quickActions.sessions": "عرض جميع الجلسات",
+    "dashboard.teacher.quickActions.analytics": "تحليلات مفصلة",
 
     // Hero Section
     "hero.subtitle":
