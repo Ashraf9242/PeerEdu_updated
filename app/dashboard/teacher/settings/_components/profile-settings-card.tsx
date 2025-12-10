@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { toast } from "sonner"
 import Image from "next/image"
 
@@ -18,14 +18,17 @@ import {
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/contexts/language-context"
 import { cn } from "@/lib/utils"
+import { updateTeacherProfile } from "../_actions/update-teacher-profile"
 
 type TeacherProfileSettingsProps = {
   teacher: {
+    prefix?: string | null
     firstName: string | null
     middleName: string | null
     familyName: string | null
     email: string
     phone: string | null
+    bio?: string | null
   }
 }
 
@@ -36,14 +39,15 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [formState, setFormState] = useState({
-    prefix: "Mr.",
+    prefix: teacher.prefix ?? "Mr.",
     firstName: teacher.firstName ?? "",
     middleName: teacher.middleName ?? "",
     familyName: teacher.familyName ?? "",
     phone: teacher.phone ?? "",
     email: teacher.email,
-    bio: "",
+    bio: teacher.bio ?? "",
   })
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     return () => {
@@ -70,10 +74,24 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSaving(true)
-    setTimeout(() => {
-      setIsSaving(false)
-      toast.success(t("dashboard.teacher.profileUpdated"))
-    }, 600)
+    startTransition(async () => {
+      try {
+        await updateTeacherProfile({
+          prefix: formState.prefix,
+          firstName: formState.firstName.trim(),
+          middleName: formState.middleName?.trim() || "",
+          familyName: formState.familyName.trim(),
+          phone: formState.phone.trim(),
+          bio: formState.bio.trim(),
+        })
+        toast.success(t("dashboard.teacher.profileUpdated"))
+      } catch (error) {
+        console.error("Failed to update teacher profile:", error)
+        toast.error("Unable to update your profile. Please try again.")
+      } finally {
+        setIsSaving(false)
+      }
+    })
   }
 
   return (
@@ -217,8 +235,8 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
           </div>
         </CardContent>
         <CardFooter className="flex justify-end pt-6">
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? t("dashboard.teacher.saving") : t("dashboard.teacher.updateProfile")}
+          <Button type="submit" disabled={isSaving || isPending}>
+            {isSaving || isPending ? t("dashboard.teacher.saving") : t("dashboard.teacher.updateProfile")}
           </Button>
         </CardFooter>
       </form>

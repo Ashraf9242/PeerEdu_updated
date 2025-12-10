@@ -40,8 +40,8 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
 
   const isTeacherSettings = pathname?.startsWith("/dashboard/teacher/settings") ?? false
   const navClasses = isTeacherSettings
-    ? "sticky top-0 z-40 border-b bg-white shadow-sm"
-    : "sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    ? "sticky top-0 z-40 border-b bg-white text-foreground shadow-sm"
+    : "sticky top-0 z-40 border-b bg-background/90 text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/60"
 
   const isActive = (href: string) => {
     if (href === "/") {

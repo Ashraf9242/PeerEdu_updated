@@ -229,6 +229,7 @@ export function SubjectRegistrationCard() {
                 onCheckedChange={(checked) =>
                   setVerificationChecks((prev) => ({ ...prev, identityConfirmed: Boolean(checked) }))
                 }
+                className="h-5 w-5 rounded border-2 border-primary text-primary focus-visible:ring-primary"
               />
               <Label htmlFor="identityConfirmed" className="text-sm leading-tight">
                 {t("dashboard.teacher.subjectVerification.identity")}
@@ -241,6 +242,7 @@ export function SubjectRegistrationCard() {
                 onCheckedChange={(checked) =>
                   setVerificationChecks((prev) => ({ ...prev, gradeConfirmed: Boolean(checked) }))
                 }
+                className="h-5 w-5 rounded border-2 border-primary text-primary focus-visible:ring-primary"
               />
               <Label htmlFor="gradeConfirmed" className="text-sm leading-tight">
                 {t("dashboard.teacher.subjectVerification.grade")}
@@ -251,7 +253,7 @@ export function SubjectRegistrationCard() {
             </p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end border-t border-border pt-6 mt-6">
           <Button type="submit" disabled={isSaving}>
             {isSaving ? t("dashboard.teacher.saving") : t("dashboard.teacher.subjectSubmit")}
           </Button>

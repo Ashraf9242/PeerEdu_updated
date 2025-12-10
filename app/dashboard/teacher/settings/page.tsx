@@ -10,13 +10,23 @@ export default async function TeacherSettingsPage() {
   const teacher = await db.user.findUnique({
     where: { id: sessionUser.id },
     select: {
+      name: true,
       firstName: true,
       middleName: true,
       familyName: true,
       phone: true,
       email: true,
+      tutorProfile: {
+        select: {
+          bio: true,
+        },
+      },
     },
   })
+  const prefixFromName = (() => {
+    const raw = teacher?.name?.split(" ")[0] ?? ""
+    return raw === "Mr." || raw === "Ms." ? raw : undefined
+  })()
 
   return (
     <div className="space-y-8">
@@ -28,11 +38,13 @@ export default async function TeacherSettingsPage() {
       <div className="grid gap-8 lg:grid-cols-7">
         <TeacherProfileSettingsCard
           teacher={{
+            prefix: prefixFromName,
             firstName: teacher?.firstName ?? sessionUser.name ?? "",
             middleName: teacher?.middleName ?? "",
             familyName: teacher?.familyName ?? "",
             phone: teacher?.phone ?? "",
             email: teacher?.email ?? sessionUser.email ?? "teacher@peeredu.com",
+            bio: teacher?.tutorProfile?.bio ?? "",
           }}
         />
         <div className="space-y-8 lg:col-span-3">
