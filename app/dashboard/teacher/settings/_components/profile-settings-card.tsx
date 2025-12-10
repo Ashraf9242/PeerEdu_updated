@@ -140,12 +140,10 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
                 <SelectTrigger id="prefix">
                   <SelectValue placeholder={t("dashboard.teacher.prefixPlaceholder")} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mr.">Mr.</SelectItem>
-                  <SelectItem value="Ms.">Ms.</SelectItem>
-                  <SelectItem value="Dr.">Dr.</SelectItem>
-                  <SelectItem value="Prof.">Prof.</SelectItem>
-                </SelectContent>
+              <SelectContent>
+                <SelectItem value="Mr.">Mr.</SelectItem>
+                <SelectItem value="Ms.">Ms.</SelectItem>
+              </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 {t("dashboard.teacher.prefixHelper")}
@@ -203,18 +201,19 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
                 onChange={(event) => handleChange("phone", event.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="bio">{t("dashboard.teacher.bio")}</Label>
-              <Textarea
-                id="bio"
-                rows={4}
-                value={formState.bio}
-                onChange={(event) => handleChange("bio", event.target.value)}
-              />
-            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bio">{t("dashboard.teacher.bio")}</Label>
+            <Textarea
+              id="bio"
+              rows={4}
+              value={formState.bio}
+              onChange={(event) => handleChange("bio", event.target.value)}
+            />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end pt-6">
           <Button type="submit" disabled={isSaving}>
             {isSaving ? t("dashboard.teacher.saving") : t("dashboard.teacher.updateProfile")}
           </Button>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { CalendarClock, Sparkles, BellRing, Target } from "lucide-react";
@@ -30,6 +30,11 @@ export function StudentHeroSection({
 }: StudentHeroProps) {
   const { language, t } = useLanguage();
   const isArabic = language === "ar";
+  const omrFormatter = new Intl.NumberFormat("en-OM", {
+    style: "currency",
+    currency: "OMR",
+    minimumFractionDigits: 2,
+  });
 
   const greeting = getGreeting(language);
   const firstName = extractFirstName(studentName, isArabic);
@@ -39,22 +44,32 @@ export function StudentHeroSection({
     : noSessionDescription(language);
   const pendingText = pendingDescription(pendingCount, language);
 
+  const estimatedSavings = omrFormatter.format(stats.completedCount * 6);
   const statsCopy = [
     {
       label: t("dashboard.student.stats.active"),
-      value: `${stats.upcomingCount} ${isArabic ? "قادمة" : "upcoming"}`,
+      value: `${stats.upcomingCount}`,
+      helper: isArabic ? "جلسات قادمة" : "upcoming",
     },
     {
       label: t("dashboard.student.stats.hours"),
-      value: `${stats.totalHours} ${isArabic ? "ساعة مسجلة" : "hrs logged"}`,
+      value: `${stats.totalHours}`,
+      helper: isArabic ? "ساعات مسجلة" : "hrs logged",
     },
     {
       label: t("dashboard.student.stats.completed"),
-      value: `${stats.completedCount} ${isArabic ? "جلسات" : "sessions"}`,
+      value: `${stats.completedCount}`,
+      helper: isArabic ? "جلسات" : "sessions",
     },
     {
       label: t("dashboard.student.stats.favorite"),
       value: `${stats.favoriteTutorsCount}`,
+      helper: isArabic ? "معلمون مفضلون" : "favorite tutors",
+    },
+    {
+      label: t("dashboard.student.stats.savings"),
+      value: estimatedSavings,
+      helper: "OMR",
     },
   ];
 
@@ -66,97 +81,170 @@ export function StudentHeroSection({
     t,
   });
 
-  return (
-    <section className="rounded-3xl border bg-gradient-to-r from-primary via-primary/90 to-violet-600 p-8 text-white shadow-xl">
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex-1 space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
-            <Sparkles className="h-4 w-4" />
-            {t("dashboard.student.hero.badge")}
-          </span>
-          <h1 className="text-4xl font-semibold leading-tight">
-            {greeting}, {firstName}.
-          </h1>
-          <p className="text-lg text-white/85">{nextSessionText}</p>
-          <p className="text-sm text-white/70">{pendingText}</p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {statsCopy.map(({ label, value }) => (
-              <div
-                key={label}
-                className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm backdrop-blur"
-              >
-                <p className="text-white/70">{label}</p>
-                <p className="text-lg font-semibold text-white">{value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="w-full rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur lg:w-96">
-          <p className="text-sm uppercase tracking-wide text-white/70">
-            {t("dashboard.student.hero.control")}
-          </p>
-          <ul className="mt-4 space-y-3 text-sm">
-            {[t("dashboard.student.hero.point1"), t("dashboard.student.hero.point2"), t("dashboard.student.hero.point3")].map(
-              (copy) => (
-                <li key={copy} className="flex items-start gap-3 text-white/90">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-white/60" />
-                  {copy}
-                </li>
-              ),
-            )}
-          </ul>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/tutors"
-              className="inline-flex flex-1 items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow hover:bg-white/90"
-            >
-              {t("dashboard.student.hero.ctaFindTutor")}
-            </Link>
-            <Link
-              href="/dashboard/student/bookings"
-              className="inline-flex flex-1 items-center justify-center rounded-full border border-white/60 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-            >
-              {t("dashboard.student.hero.ctaReview")}
-            </Link>
-          </div>
-        </div>
-      </div>
+  const checklistItems = [
+    t("dashboard.student.hero.checklistProfile"),
+    t("dashboard.student.hero.checklistBook"),
+    t("dashboard.student.hero.checklistReview"),
+  ];
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
-          <Card key={card.title} className="h-full">
-            <CardHeader className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-primary/10 p-2 text-primary">
-                  <card.icon className="h-5 w-5" />
+  return (
+    <div className="space-y-6">
+      <section className="rounded-3xl border bg-gradient-to-r from-primary via-primary/90 to-violet-600 p-8 text-white shadow-xl">
+        <div className="flex flex-col gap-8">
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+              <Sparkles className="h-4 w-4" />
+              {t("dashboard.student.hero.badge")}
+            </span>
+            <h1 className="text-4xl font-semibold leading-tight">
+              {greeting}, {firstName}.
+            </h1>
+            <p className="text-lg text-white/85">{nextSessionText}</p>
+            <p className="text-sm text-white/70">{pendingText}</p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {statsCopy.map(({ label, value, helper }) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm backdrop-blur"
+                >
+                  <p className="text-white/70">{label}</p>
+                  <p className="text-2xl font-semibold text-white">{value}</p>
+                  {helper && <p className="text-xs text-white/60">{helper}</p>}
                 </div>
-                <div>
-                  <CardTitle>{card.title}</CardTitle>
-                  <CardDescription>{card.description}</CardDescription>
-                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur">
+            <p className="text-sm uppercase tracking-wide text-white/70">
+              {t("dashboard.student.hero.control")}
+            </p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-white/20 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-wide text-white/60">
+                  {t("dashboard.student.hero.spotlightNext")}
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {nextSession ? nextSession.subject : t("dashboard.student.cards.nextEmpty")}
+                </p>
+                <p className="text-sm text-white/70">
+                  {nextSession
+                    ? new Intl.DateTimeFormat(language === "ar" ? "ar-SA" : "en-US", {
+                        dateStyle: "full",
+                        timeStyle: "short",
+                        timeZone: "Asia/Muscat",
+                      }).format(new Date(nextSession.startAt))
+                    : t("dashboard.student.hero.spotlightSubtitle")}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground text-foreground">
-                {card.detail}
+              <div className="rounded-xl border border-white/20 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-wide text-white/60">
+                  {t("dashboard.student.hero.spotlightPending")}
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">{pendingCount}</p>
+                <p className="text-sm text-white/70">{pendingText}</p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <p className="text-xs uppercase tracking-wide text-white/60">
+                {t("dashboard.student.hero.spotlightChecklist")}
               </p>
-              <Link
-                href={card.link}
-                className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
-              >
-                {card.linkLabel}
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
+              <ul className="mt-3 space-y-2 text-sm">
+                {checklistItems.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-white/85">
+                    <div className="mt-1 h-2 w-2 rounded-full bg-white/60" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/tutors"
+                  className="inline-flex flex-1 items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow hover:bg-white/90"
+                >
+                  {t("dashboard.student.hero.ctaFindTutor")}
+                </Link>
+                <Link
+                  href="/dashboard/student/bookings"
+                  className="inline-flex flex-1 items-center justify-center rounded-full border border-white/60 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  {t("dashboard.student.hero.ctaReview")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <Card className="border-primary/20 bg-card/60">
+          <CardHeader className="space-y-2">
+            <CardTitle>{t("dashboard.student.hero.spotlightTitle")}</CardTitle>
+            <CardDescription>{t("dashboard.student.hero.spotlightSubtitle")}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.student.hero.spotlightNext")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-foreground">
+                {nextSession ? nextSession.subject : t("dashboard.student.cards.nextEmpty")}
+              </p>
+              <p className="text-sm text-muted-foreground">{nextSessionText}</p>
+            </div>
+            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.student.hero.spotlightPending")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-foreground">{pendingCount}</p>
+              <p className="text-sm text-muted-foreground">{pendingText}</p>
+            </div>
+            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("dashboard.student.stats.savings")}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-foreground">{estimatedSavings}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("dashboard.student.hero.spotlightSavingsNote")}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {cards.map((card) => (
+            <Card key={card.title} className="h-full">
+              <CardHeader className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                    <card.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle>{card.title}</CardTitle>
+                    <CardDescription>{card.description}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground text-foreground">{card.detail}</p>
+                <Link
+                  href={card.link}
+                  className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  {card.linkLabel}
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
 
 function extractFirstName(name: string | null, isArabic: boolean) {
   if (!name || !name.trim()) {
-    return isArabic ? "صديقي" : "there";
+    return isArabic ? "هناك" : "there";
   }
   return name.trim().split(" ")[0];
 }
@@ -166,7 +254,7 @@ function getGreeting(language: "en" | "ar") {
   if (language === "ar") {
     if (omanHour < 12) return "صباح الخير";
     if (omanHour < 18) return "مساء الخير";
-    return "مساء سعيد";
+    return "ليلة سعيدة";
   }
   if (omanHour < 12) return "Good morning";
   if (omanHour < 18) return "Good afternoon";
@@ -180,24 +268,24 @@ function nextSessionDescription(
 ) {
   const tutorName = session.tutor.name || (language === "ar" ? "معلمك" : "your tutor");
   return language === "ar"
-    ? `الجلسة القادمة: ${session.subject} مع ${tutorName} ${relativeTime}.`
+    ? `الجلسة التالية: ${session.subject} مع ${tutorName} ${relativeTime}.`
     : `Next up: ${session.subject} with ${tutorName} ${relativeTime}.`;
 }
 
 function noSessionDescription(language: "en" | "ar") {
   return language === "ar"
-    ? "لا توجد جلسات مجدولة. احجز معلمك القادم للحفاظ على زخم التعلم."
+    ? "لا توجد جلسات مجدولة. احجز الجلسة القادمة لمواصلة التقدم."
     : "You have no sessions scheduled. Book your next tutor to keep learning momentum.";
 }
 
 function pendingDescription(count: number, language: "en" | "ar") {
   if (count > 0) {
     return language === "ar"
-      ? `لديك ${count} طلب بانتظار التأكيد.`
+      ? `لديك ${count} طلب قيد الانتظار.`
       : `${count} request${count === 1 ? "" : "s"} awaiting confirmation.`;
   }
   return language === "ar"
-    ? "تمت معالجة جميع الطلبات."
+    ? "لا توجد طلبات معلقة."
     : "All requests are cleared.";
 }
 
@@ -234,7 +322,7 @@ function buildMomentumCards({
       detail: nextSession
         ? nextSessionTime
         : language === "ar"
-          ? "استخدم الإجراءات السريعة لحجز جلستك التالية."
+          ? "استخدم الإجراءات السريعة لحجز جلستك القادمة."
           : "Use quick actions to book your next study block.",
       icon: CalendarClock,
       link: nextSession ? `/bookings/${nextSession.id}` : "/tutors",
@@ -247,14 +335,14 @@ function buildMomentumCards({
       description:
         pendingCount > 0
           ? language === "ar"
-            ? `لديك ${pendingCount} طلب بانتظار التأكيد.`
+            ? `لديك ${pendingCount} طلب ينتظر الموافقة.`
             : `You have ${pendingCount} request${pendingCount === 1 ? "" : "s"} waiting for confirmation.`
           : t("dashboard.student.cards.pendingClear"),
       detail:
         pendingCount > 0
           ? language === "ar"
-            ? "سنُعلمك بمجرد رد المعلمين."
-            : "We’ll notify you as soon as your tutors respond."
+            ? "سنخطرك بمجرد رد المعلمين."
+            : "We'll notify you as soon as your tutors respond."
           : language === "ar"
             ? "يمكنك طلب المزيد من الجلسات في أي وقت."
             : "Feel free to request more sessions anytime.",
@@ -266,11 +354,11 @@ function buildMomentumCards({
       title: t("dashboard.student.cards.streak"),
       description:
         language === "ar"
-          ? `${stats.completedCount} جلسات مكتملة مع ${stats.totalHours} ساعات تعلم مسجلة.`
+          ? `${stats.completedCount} جلسات مكتملة مع ${stats.totalHours} ساعة دراسة حتى الآن.`
           : `${stats.completedCount} sessions completed with ${stats.totalHours} study hours logged so far.`,
       detail:
         language === "ar"
-          ? "أضف المزيد من الجلسات للحفاظ على تقدمك."
+          ? "أضف المزيد من الجلسات لتحافظ على استمراريتك."
           : "Add more sessions to keep your streak growing.",
       icon: Target,
       link: "/dashboard/student/bookings",
