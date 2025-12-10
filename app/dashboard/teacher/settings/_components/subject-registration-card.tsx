@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useLanguage } from "@/contexts/language-context"
 import { AvailabilityManager } from "@/components/availability-manager"
 import {
@@ -36,6 +37,10 @@ export function SubjectRegistrationCard() {
     college: "",
     grade: "",
   })
+  const [verificationChecks, setVerificationChecks] = useState({
+    identityConfirmed: false,
+    gradeConfirmed: false,
+  })
 
   const universityOptions = UNIVERSITY_OPTIONS.map((option) => ({
     value: option.value,
@@ -59,11 +64,16 @@ export function SubjectRegistrationCard() {
       toast.error(t("register.placeholder.university"))
       return
     }
+    if (!verificationChecks.identityConfirmed || !verificationChecks.gradeConfirmed) {
+      toast.error(t("dashboard.teacher.subjectVerification.error"))
+      return
+    }
     setIsSaving(true)
 
     setTimeout(() => {
       setSubjects((prev) => [...prev, formState])
       setFormState({ name: "", code: "", college: "", grade: "" })
+      setVerificationChecks({ identityConfirmed: false, gradeConfirmed: false })
       setIsSaving(false)
       toast.success(t("dashboard.teacher.subjectAdded"))
     }, 500)
@@ -165,7 +175,7 @@ export function SubjectRegistrationCard() {
                     <div className="text-left">
                       <p className="font-semibold text-xs">{subject.name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        {subject.code} • {subject.grade} •{" "}
+                        {subject.code} | {subject.grade} |{" "}
                         {universityLabelMap[subject.college] || subject.college}
                       </p>
                     </div>
@@ -174,6 +184,35 @@ export function SubjectRegistrationCard() {
               </div>
             </div>
           )}
+          <div className="space-y-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="identityConfirmed"
+                checked={verificationChecks.identityConfirmed}
+                onCheckedChange={(checked) =>
+                  setVerificationChecks((prev) => ({ ...prev, identityConfirmed: Boolean(checked) }))
+                }
+              />
+              <Label htmlFor="identityConfirmed" className="text-sm leading-tight">
+                {t("dashboard.teacher.subjectVerification.identity")}
+              </Label>
+            </div>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="gradeConfirmed"
+                checked={verificationChecks.gradeConfirmed}
+                onCheckedChange={(checked) =>
+                  setVerificationChecks((prev) => ({ ...prev, gradeConfirmed: Boolean(checked) }))
+                }
+              />
+              <Label htmlFor="gradeConfirmed" className="text-sm leading-tight">
+                {t("dashboard.teacher.subjectVerification.grade")}
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.teacher.subjectVerification.helper")}
+            </p>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button type="submit" disabled={isSaving}>
