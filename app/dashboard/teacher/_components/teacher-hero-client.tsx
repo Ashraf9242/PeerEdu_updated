@@ -15,7 +15,7 @@ import { useLanguage } from "@/contexts/language-context"
 import { Badge } from "@/components/ui/badge"
 
 type TeacherHeroClientProps = {
-  firstName: string
+  teacherName: string
   stats: {
     pendingCount: number
     confirmedCount: number
@@ -26,7 +26,7 @@ type TeacherHeroClientProps = {
   subjectsCount: number
 }
 
-export function TeacherHeroClient({ firstName, stats, subjectsCount }: TeacherHeroClientProps) {
+export function TeacherHeroClient({ teacherName, stats, subjectsCount }: TeacherHeroClientProps) {
   const { t, language } = useLanguage()
 
   const omrFormatter = new Intl.NumberFormat(language === "ar" ? "ar-OM" : "en-OM", {
@@ -81,7 +81,7 @@ export function TeacherHeroClient({ firstName, stats, subjectsCount }: TeacherHe
     },
   ]
 
-  const welcomeText = t("dashboard.teacher.hero.welcome").replace("{{name}}", firstName)
+  const welcomeText = t("dashboard.teacher.hero.welcome").replace("{{name}}", teacherName)
 
   return (
     <section className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary via-primary/90 to-slate-900 p-8 text-white shadow-xl">

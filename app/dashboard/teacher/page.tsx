@@ -42,11 +42,11 @@ export default async function TeacherDashboardPage() {
 
 async function TeacherHero({ teacher }: { teacher: Pick<User, "id" | "name"> }) {
   const data = await getTeacherDashboardData(teacher.id)
-  const firstName = teacher.name?.split(" ")[0] || "teacher"
+  const displayName = teacher.name?.trim() || "teacher"
 
   return (
     <TeacherHeroClient
-      firstName={firstName}
+      teacherName={displayName}
       stats={{
         pendingCount: data.stats.pendingCount,
         confirmedCount: data.stats.confirmedCount,
