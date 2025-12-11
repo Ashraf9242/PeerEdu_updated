@@ -30,11 +30,6 @@ export function StudentHeroSection({
 }: StudentHeroProps) {
   const { language, t } = useLanguage();
   const isArabic = language === "ar";
-  const omrFormatter = new Intl.NumberFormat("en-OM", {
-    style: "currency",
-    currency: "OMR",
-    minimumFractionDigits: 2,
-  });
 
   const greeting = getGreeting(language);
   const firstName = extractFirstName(studentName, isArabic);
@@ -44,7 +39,6 @@ export function StudentHeroSection({
     : noSessionDescription(language);
   const pendingText = pendingDescription(pendingCount, language);
 
-  const estimatedSavings = omrFormatter.format(stats.completedCount * 6);
   const statsCopy = [
     {
       label: t("dashboard.student.stats.active"),
@@ -65,11 +59,6 @@ export function StudentHeroSection({
       label: t("dashboard.student.stats.favorite"),
       value: `${stats.favoriteTutorsCount}`,
       helper: isArabic ? "معلمون مفضلون" : "favorite tutors",
-    },
-    {
-      label: t("dashboard.student.stats.savings"),
-      value: estimatedSavings,
-      helper: "OMR",
     },
   ];
 
@@ -176,41 +165,7 @@ export function StudentHeroSection({
         </div>
       </section>
 
-      <section className="space-y-4">
-        <Card className="border-primary/20 bg-card/60">
-          <CardHeader className="space-y-2">
-            <CardTitle>{t("dashboard.student.hero.spotlightTitle")}</CardTitle>
-            <CardDescription>{t("dashboard.student.hero.spotlightSubtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("dashboard.student.hero.spotlightNext")}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-foreground">
-                {nextSession ? nextSession.subject : t("dashboard.student.cards.nextEmpty")}
-              </p>
-              <p className="text-sm text-muted-foreground">{nextSessionText}</p>
-            </div>
-            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("dashboard.student.hero.spotlightPending")}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-foreground">{pendingCount}</p>
-              <p className="text-sm text-muted-foreground">{pendingText}</p>
-            </div>
-            <div className="rounded-xl border border-primary/10 bg-background/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("dashboard.student.stats.savings")}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-foreground">{estimatedSavings}</p>
-              <p className="text-sm text-muted-foreground">
-                {t("dashboard.student.hero.spotlightSavingsNote")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
+      <section>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
             <Card key={card.title} className="h-full">

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useLanguage } from "@/contexts/language-context"
 
 interface Availability {
   id: string
@@ -45,13 +46,13 @@ interface AvailabilityManagerProps {
 }
 
 const daysOfWeek = [
-  { name: "Sunday", value: 0 },
-  { name: "Monday", value: 1 },
-  { name: "Tuesday", value: 2 },
-  { name: "Wednesday", value: 3 },
-  { name: "Thursday", value: 4 },
-  { name: "Friday", value: 5 },
-  { name: "Saturday", value: 6 },
+  { labelKey: "availability.day.sunday", value: 0 },
+  { labelKey: "availability.day.monday", value: 1 },
+  { labelKey: "availability.day.tuesday", value: 2 },
+  { labelKey: "availability.day.wednesday", value: 3 },
+  { labelKey: "availability.day.thursday", value: 4 },
+  { labelKey: "availability.day.friday", value: 5 },
+  { labelKey: "availability.day.saturday", value: 6 },
 ]
 
 const simulateApiCall = <T,>(data: T, successMessage: string, errorMessage: string): Promise<T> =>
@@ -67,26 +68,40 @@ const simulateApiCall = <T,>(data: T, successMessage: string, errorMessage: stri
     }, 500)
   })
 
-const addAvailabilityApi = async (tutorId: string, newAvailability: Omit<Availability, "id">): Promise<Availability> => {
+type ApiMessages = {
+  success: string
+  error: string
+}
+
+const addAvailabilityApi = async (
+  tutorId: string,
+  newAvailability: Omit<Availability, "id">,
+  messages: ApiMessages,
+): Promise<Availability> => {
   console.log("API POST:", { tutorId, newAvailability })
   return simulateApiCall(
     { ...newAvailability, id: `avail-${Date.now()}` },
-    "Availability slot saved.",
-    "Unable to save the availability slot."
+    messages.success,
+    messages.error,
   )
 }
 
 const updateAvailabilityApi = async (
   tutorId: string,
   updatedAvailability: Availability,
+  messages: ApiMessages,
 ): Promise<Availability> => {
   console.log("API PUT:", { tutorId, updatedAvailability })
-  return simulateApiCall(updatedAvailability, "Availability slot updated.", "Unable to update the availability slot.")
+  return simulateApiCall(updatedAvailability, messages.success, messages.error)
 }
 
-const deleteAvailabilityApi = async (tutorId: string, availabilityId: string): Promise<string> => {
+const deleteAvailabilityApi = async (
+  tutorId: string,
+  availabilityId: string,
+  messages: ApiMessages,
+): Promise<string> => {
   console.log("API DELETE:", { tutorId, availabilityId })
-  return simulateApiCall(availabilityId, "Availability slot removed.", "Unable to delete the availability slot.")
+  return simulateApiCall(availabilityId, messages.success, messages.error)
 }
 
 interface AvailabilityDialogProps {
@@ -104,6 +119,7 @@ const AvailabilityDialog: React.FC<AvailabilityDialogProps> = ({
   initialData,
   dayOfWeek,
 }) => {
+  const { t } = useLanguage()
   const [startTime, setStartTime] = useState(initialData?.startTime || "")
   const [endTime, setEndTime] = useState(initialData?.endTime || "")
 
@@ -119,11 +135,11 @@ const AvailabilityDialog: React.FC<AvailabilityDialogProps> = ({
 
   const handleSubmit = () => {
     if (!startTime || !endTime) {
-      toast.error("Please enter both a start time and an end time.")
+      toast.error(t("availability.error.missing"))
       return
     }
     if (endTime <= startTime) {
-      toast.error("End time must be later than the start time.")
+      toast.error(t("availability.error.order"))
       return
     }
     onSave({ dayOfWeek, startTime, endTime })
@@ -134,12 +150,14 @@ const AvailabilityDialog: React.FC<AvailabilityDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{initialData ? "Edit availability" : "Add availability"}</DialogTitle>
+          <DialogTitle>
+            {initialData ? t("availability.dialog.edit") : t("availability.dialog.add")}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="startTime" className="text-right">
-              Start time
+              {t("availability.dialog.start")}
             </Label>
             <Input
               id="startTime"
@@ -151,7 +169,7 @@ const AvailabilityDialog: React.FC<AvailabilityDialogProps> = ({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="endTime" className="text-right">
-              End time
+              {t("availability.dialog.end")}
             </Label>
             <Input
               id="endTime"
@@ -164,10 +182,10 @@ const AvailabilityDialog: React.FC<AvailabilityDialogProps> = ({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{t("availability.dialog.cancel")}</Button>
           </DialogClose>
           <Button type="button" onClick={handleSubmit}>
-            Save slot
+            {t("availability.dialog.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -180,15 +198,22 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
   initialAvailabilities = [],
   className,
   showHeading = true,
-  heading = "Manage Availability",
+  heading,
   layout = "full",
 }) => {
+  const { t } = useLanguage()
   const [availabilities, setAvailabilities] = useState<Availability[]>(initialAvailabilities)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingAvailability, setEditingAvailability] = useState<Availability | undefined>(undefined)
   const [currentDayOfWeek, setCurrentDayOfWeek] = useState<number>(0)
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
   const [availabilityToDelete, setAvailabilityToDelete] = useState<string | undefined>(undefined)
+
+  const dayOptions = daysOfWeek.map((day) => ({
+    value: day.value,
+    label: t(day.labelKey),
+  }))
+  const resolvedHeading = heading ?? t("availability.heading")
 
   const handleAddClick = (day: number) => {
     setCurrentDayOfWeek(day)
@@ -205,13 +230,23 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
   const handleSaveAvailability = async (newAvailabilityData: Omit<Availability, "id">) => {
     try {
       if (editingAvailability) {
-        const updated = await updateAvailabilityApi(tutorId, {
-          ...newAvailabilityData,
-          id: editingAvailability.id,
-        } as Availability)
+        const updated = await updateAvailabilityApi(
+          tutorId,
+          {
+            ...newAvailabilityData,
+            id: editingAvailability.id,
+          } as Availability,
+          {
+            success: t("availability.toast.updateSuccess"),
+            error: t("availability.toast.updateError"),
+          },
+        )
         setAvailabilities((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))
       } else {
-        const added = await addAvailabilityApi(tutorId, newAvailabilityData)
+        const added = await addAvailabilityApi(tutorId, newAvailabilityData, {
+          success: t("availability.toast.saveSuccess"),
+          error: t("availability.toast.saveError"),
+        })
         setAvailabilities((prev) => [...prev, added])
       }
     } catch (error) {
@@ -227,7 +262,10 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
   const handleConfirmDelete = async () => {
     if (availabilityToDelete) {
       try {
-        await deleteAvailabilityApi(tutorId, availabilityToDelete)
+        await deleteAvailabilityApi(tutorId, availabilityToDelete, {
+          success: t("availability.toast.deleteSuccess"),
+          error: t("availability.toast.deleteError"),
+        })
         setAvailabilities((prev) => prev.filter((a) => a.id !== availabilityToDelete))
       } catch (error) {
         console.error("Failed to delete availability:", error)
@@ -245,13 +283,13 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
 
   return (
     <div className={cn("space-y-6", className)}>
-      {showHeading && <h2 className="text-2xl font-bold text-center">{heading}</h2>}
+      {showHeading && <h2 className="text-2xl font-bold text-center">{resolvedHeading}</h2>}
 
       <div className={gridClasses}>
-        {daysOfWeek.map((day) => (
+        {dayOptions.map((day) => (
           <Card key={day.value} className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{day.name}</CardTitle>
+              <CardTitle className="text-sm font-medium">{day.label}</CardTitle>
               <Button variant="ghost" size="icon" onClick={() => handleAddClick(day.value)}>
                 <Plus className="h-4 w-4 text-muted-foreground" />
               </Button>
@@ -290,7 +328,7 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
                     </div>
                   ))}
                 {availabilities.filter((a) => a.dayOfWeek === day.value).length === 0 && (
-                  <p className="text-sm text-muted-foreground">No slots yet</p>
+                  <p className="text-sm text-muted-foreground">{t("availability.empty")}</p>
                 )}
               </div>
             </CardContent>
@@ -309,14 +347,14 @@ export const AvailabilityManager: React.FC<AvailabilityManagerProps> = ({
       <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this availability?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently remove the selected time slot.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("availability.dialog.deleteTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("availability.dialog.deleteDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t("availability.dialog.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {t("availability.dialog.deleteConfirm")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

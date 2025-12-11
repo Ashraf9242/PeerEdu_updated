@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import Image from "next/image"
 
@@ -47,7 +47,6 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
     email: teacher.email,
     bio: teacher.bio ?? "",
   })
-  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     return () => {
@@ -71,27 +70,25 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
     setPhotoPreview(objectUrl)
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSaving(true)
-    startTransition(async () => {
-      try {
-        await updateTeacherProfile({
-          prefix: formState.prefix,
-          firstName: formState.firstName.trim(),
-          middleName: formState.middleName?.trim() || "",
-          familyName: formState.familyName.trim(),
-          phone: formState.phone.trim(),
-          bio: formState.bio.trim(),
-        })
-        toast.success(t("dashboard.teacher.profileUpdated"))
-      } catch (error) {
-        console.error("Failed to update teacher profile:", error)
-        toast.error("Unable to update your profile. Please try again.")
-      } finally {
-        setIsSaving(false)
-      }
-    })
+    try {
+      await updateTeacherProfile({
+        prefix: formState.prefix,
+        firstName: formState.firstName.trim(),
+        middleName: formState.middleName?.trim() || "",
+        familyName: formState.familyName.trim(),
+        phone: formState.phone.trim(),
+        bio: formState.bio.trim(),
+      })
+      toast.success(t("dashboard.teacher.profileUpdated"))
+    } catch (error) {
+      console.error("Failed to update teacher profile:", error)
+      toast.error(t("dashboard.teacher.profileUpdateError"))
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -235,8 +232,8 @@ export function TeacherProfileSettingsCard({ teacher }: TeacherProfileSettingsPr
           </div>
         </CardContent>
         <CardFooter className="flex justify-end pt-6">
-          <Button type="submit" disabled={isSaving || isPending}>
-            {isSaving || isPending ? t("dashboard.teacher.saving") : t("dashboard.teacher.updateProfile")}
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? t("dashboard.teacher.saving") : t("dashboard.teacher.updateProfile")}
           </Button>
         </CardFooter>
       </form>

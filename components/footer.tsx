@@ -24,18 +24,18 @@ export function Footer() {
             <h4 className="font-medium text-foreground">{t("footer.contact")}</h4>
             <div className="space-y-2">
               <a 
-                href="mailto:mdashraf9242@gmail.com" 
+                href="mailto:peeredu.company@gmail.com" 
                 className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 <Mail className="h-4 w-4" />
-                <span>mdashraf9242@gmail.com</span>
+                <span>peeredu.company@gmail.com</span>
               </a>
               <a 
-                href="tel:+96892421050" 
+                href="tel:+96878537834" 
                 className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 <Phone className="h-4 w-4" />
-                <span>+968 92421050</span>
+                <span>+968 78537834</span>
               </a>
               <a 
                 href="https://maps.google.com/?q=Samail,Al+Dakhliyah,Oman" 
@@ -53,11 +53,21 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-medium text-foreground">{t("footer.followUs")}</h4>
             <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                href="https://www.instagram.com/peer_edu/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                href="https://www.linkedin.com/in/peeredu/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>

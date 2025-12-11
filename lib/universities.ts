@@ -6,7 +6,6 @@ export type UniversityOption = {
 
 export const UNIVERSITY_OPTIONS: UniversityOption[] = [
   { value: "squ", labelKey: "register.university.squ", defaultLabel: "Sultan Qaboos University" },
-  { value: "uts-general", labelKey: "register.university.utas.general", defaultLabel: "UTAS (General)" },
   { value: "utas-ibri", labelKey: "register.university.utas.ibri", defaultLabel: "UTAS Ibri" },
   { value: "utas-muscat", labelKey: "register.university.utas.muscat", defaultLabel: "UTAS Muscat" },
   { value: "utas-nizwa", labelKey: "register.university.utas.nizwa", defaultLabel: "UTAS Nizwa" },
