@@ -39,9 +39,11 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
   }
 
   const isTeacherSettings = pathname?.startsWith("/dashboard/teacher/settings") ?? false
+  const baseNavClasses =
+    "sticky top-0 z-40 border-b text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/60"
   const navClasses = isTeacherSettings
-    ? "sticky top-0 z-40 border-b bg-white text-foreground shadow-sm"
-    : "sticky top-0 z-40 border-b bg-background/90 text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    ? `${baseNavClasses} bg-background/95 dark:bg-background/80 shadow-sm`
+    : `${baseNavClasses} bg-background/90`
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -93,7 +95,7 @@ export function DashboardNavigation({ links }: DashboardNavigationProps) {
 
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            {!isTeacherSettings && <LanguageSwitcher />}
+            <LanguageSwitcher />
             <NotificationBell />
             <Button
               variant={isTeacherSettings ? "destructive" : "outline"}
