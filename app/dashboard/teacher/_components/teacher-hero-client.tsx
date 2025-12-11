@@ -36,6 +36,8 @@ export function TeacherHeroClient({ firstName, stats, subjectsCount }: TeacherHe
     maximumFractionDigits: 2,
   })
 
+  const ratingValue = Number.isFinite(stats.ratingAvg) ? Number(stats.ratingAvg) : 0
+
   const statsCopy = [
     {
       label: t("dashboard.teacher.stats.requests"),
@@ -67,7 +69,7 @@ export function TeacherHeroClient({ firstName, stats, subjectsCount }: TeacherHe
     },
     {
       label: t("dashboard.teacher.stats.rating"),
-      value: stats.ratingAvg.toFixed(1),
+      value: ratingValue.toFixed(1),
       helper: t("dashboard.teacher.stats.ratingHelper"),
       icon: Star,
     },
