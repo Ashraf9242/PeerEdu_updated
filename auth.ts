@@ -20,14 +20,12 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        adminMode: { label: "Admin Mode", type: "text" },
       },
       async authorize(credentials, _req) {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
 
-        const adminMode = (credentials as Record<string, string> | undefined)?.adminMode === "true"
         const user = await db.user.findUnique({
           where: { email: credentials.email },
         })
@@ -40,10 +38,6 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) {
           return null
-        }
-
-        if (adminMode && user.role !== "ADMIN") {
-          throw new Error("ADMIN_ONLY")
         }
 
         const displayName =
