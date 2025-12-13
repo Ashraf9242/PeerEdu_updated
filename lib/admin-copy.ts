@@ -22,6 +22,7 @@ export type AdminCopy = {
     title: string
     subtitle: string
     quickActionsTitle: string
+    logoutLabel: string
   }
   stats: {
     totalUsers: string
@@ -245,6 +246,7 @@ const adminCopyData: Record<SupportedLanguage, AdminCopy> = {
       title: "PeerEdu control center",
       subtitle: "Approve accounts, monitor learning activity, and keep operations steady.",
       quickActionsTitle: "Quick actions",
+      logoutLabel: "Logout",
     },
     stats: {
       totalUsers: "Total users",
@@ -516,6 +518,7 @@ const adminCopyData: Record<SupportedLanguage, AdminCopy> = {
       title: "لوحة تحكم PeerEdu",
       subtitle: "اعتمد الحسابات وراقب الحجوزات وسير التعلّم من مكان واحد.",
       quickActionsTitle: "إجراءات سريعة",
+      logoutLabel: "تسجيل الخروج",
     },
     stats: {
       totalUsers: "إجمالي المستخدمين",

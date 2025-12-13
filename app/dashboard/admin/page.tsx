@@ -255,6 +255,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
         title={copy.hero.title}
         subtitle={copy.hero.subtitle}
         quickActionsTitle={copy.hero.quickActionsTitle}
+        logoutLabel={copy.hero.logoutLabel}
         stats={adminStats}
         quickActions={quickActions}
       />
