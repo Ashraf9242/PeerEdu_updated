@@ -38,6 +38,7 @@ export type AdminPageProps = {
 }
 
 const UNIVERSITY_FILTERS = ["Sultan Qaboos University", "UTAS Ibri", "PeerEdu", "Muscat University"]
+const SELECT_ALL_VALUE = "__all"
 
 export default async function AdminDashboardPage({ searchParams }: AdminPageProps) {
   await requireRole("ADMIN")
@@ -132,10 +133,13 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
   const pendingSubjectCount = pendingSubjectApprovals.length
 
   const teacherSearch = getParam(searchParams, "teacherSearch")
-  const teacherUniversity = getParam(searchParams, "teacherUniversity")
+  const teacherUniversityRaw = getParam(searchParams, "teacherUniversity")
+  const teacherUniversity = normalizeSelectParam(teacherUniversityRaw)
   const studentSearch = getParam(searchParams, "studentSearch")
-  const studentUniversity = getParam(searchParams, "studentUniversity")
-  const bookingStatusFilter = getParam(searchParams, "bookingStatus") as BookingStatus | undefined
+  const studentUniversityRaw = getParam(searchParams, "studentUniversity")
+  const studentUniversity = normalizeSelectParam(studentUniversityRaw)
+  const bookingStatusFilterRaw = getParam(searchParams, "bookingStatus")
+  const bookingStatusFilter = normalizeSelectParam(bookingStatusFilterRaw) as BookingStatus | undefined*** End Patch
 
   const filteredTeachers = pendingTeacherAccounts.filter((teacher) => {
     const matchesQuery =
@@ -281,7 +285,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
             <TeacherFilters
               copy={copy}
               defaultSearch={teacherSearch ?? ""}
-              defaultUniversity={teacherUniversity ?? ""}
+              defaultUniversity={teacherUniversityRaw}
             />
             {filteredTeachers.length === 0 ? (
               <EmptyState message={copy.sections.pendingTeachers.empty} />
@@ -376,7 +380,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
             <StudentFilters
               copy={copy}
               defaultSearch={studentSearch ?? ""}
-              defaultUniversity={studentUniversity ?? ""}
+              defaultUniversity={studentUniversityRaw}
             />
             {filteredStudents.length === 0 ? (
               <EmptyState message={copy.sections.pendingStudents.empty} />
@@ -573,7 +577,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
             <CardDescription>{copy.sections.bookings.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <BookingFilters copy={copy} defaultStatus={bookingStatusFilter ?? ""} />
+            <BookingFilters copy={copy} defaultStatus={bookingStatusFilterRaw} />
             {filteredBookings.length === 0 ? (
               <EmptyState message={copy.sections.bookings.empty} />
             ) : (
@@ -699,7 +703,7 @@ function TeacherFilters({
 }: {
   copy: AdminCopy
   defaultSearch: string
-  defaultUniversity: string
+  defaultUniversity?: string | null
 }) {
   return (
     <form className="grid gap-3 md:grid-cols-2" method="get">
@@ -719,7 +723,7 @@ function TeacherFilters({
             <SelectValue placeholder={copy.filters.teachers.universityPlaceholder} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">{copy.filters.teachers.allOption}</SelectItem>
+            <SelectItem value={SELECT_ALL_VALUE}>{copy.filters.teachers.allOption}</SelectItem>
             {UNIVERSITY_FILTERS.map((uni) => (
               <SelectItem key={uni} value={uni}>
                 {uni}
@@ -739,7 +743,7 @@ function StudentFilters({
 }: {
   copy: AdminCopy
   defaultSearch: string
-  defaultUniversity: string
+  defaultUniversity?: string | null
 }) {
   return (
     <form className="grid gap-3 md:grid-cols-2" method="get">
@@ -759,7 +763,7 @@ function StudentFilters({
             <SelectValue placeholder={copy.filters.students.universityPlaceholder} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">{copy.filters.students.allOption}</SelectItem>
+            <SelectItem value={SELECT_ALL_VALUE}>{copy.filters.students.allOption}</SelectItem>
             {UNIVERSITY_FILTERS.map((uni) => (
               <SelectItem key={uni} value={uni}>
                 {uni}
@@ -777,7 +781,7 @@ function BookingFilters({
   defaultStatus,
 }: {
   copy: AdminCopy
-  defaultStatus: string
+  defaultStatus?: string | null
 }) {
   return (
     <form className="space-y-2" method="get">
@@ -787,7 +791,7 @@ function BookingFilters({
           <SelectValue placeholder={copy.filters.bookings.allOption} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">{copy.filters.bookings.allOption}</SelectItem>
+          <SelectItem value={SELECT_ALL_VALUE}>{copy.filters.bookings.allOption}</SelectItem>
           {Object.entries(copy.filters.bookings.statuses).map(([key, label]) => (
             <SelectItem key={key} value={key}>
               {label}
@@ -797,6 +801,13 @@ function BookingFilters({
       </Select>
     </form>
   )
+}
+
+function normalizeSelectParam(value?: string | null) {
+  if (!value || value === SELECT_ALL_VALUE) {
+    return undefined
+  }
+  return value
 }
 
 function getParam(params: Record<string, string | string[] | undefined>, key: string) {
