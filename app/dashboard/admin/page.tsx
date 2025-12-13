@@ -42,7 +42,8 @@ const UNIVERSITY_FILTERS = ["Sultan Qaboos University", "UTAS Ibri", "PeerEdu", 
 export default async function AdminDashboardPage({ searchParams }: AdminPageProps) {
   await requireRole("ADMIN")
 
-  const language = resolveLanguage(cookies().get(LANGUAGE_COOKIE)?.value)
+  const cookieStore = await cookies()
+  const language = resolveLanguage(cookieStore.get(LANGUAGE_COOKIE)?.value)
   const copy = getAdminCopy(language)
   const locale = language === "ar" ? ar : enUS
   const localeTag = language === "ar" ? "ar-OM" : "en-OM"
