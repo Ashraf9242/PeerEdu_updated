@@ -256,6 +256,11 @@ const translations = {
     "login.submit": "Sign In",
     "login.loading": "Signing you in...",
     "login.signup": "Don't have an account? Sign up here",
+    "login.adminTitle": "Administrator access",
+    "login.adminDescription": "Only PeerEdu admins should use this secure option.",
+    "login.adminBadge": "Admin only",
+    "login.adminButton": "Sign in as Admin",
+    "login.adminOnlyError": "Only admin accounts can sign in with this button.",
 
     // Register Page
     "register.title": "Create Account",
@@ -783,6 +788,11 @@ const translations = {
     "login.submit": "تسجيل الدخول",
     "login.loading": "جارٍ تسجيل الدخول...",
     "login.signup": "ليس لديك حساب؟ أنشئ حساباً هنا",
+    "login.adminTitle": "دخول المشرفين",
+    "login.adminDescription": "هذا الخيار مخصص فقط لمشرفي PeerEdu المعتمدين.",
+    "login.adminBadge": "للمشرفين فقط",
+    "login.adminButton": "تسجيل الدخول كمشرف",
+    "login.adminOnlyError": "يمكن لحسابات المشرفين فقط استخدام هذا الزر لتسجيل الدخول.",
 
     // Register Page
     "register.title": "إنشاء حساب",

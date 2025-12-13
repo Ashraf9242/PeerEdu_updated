@@ -64,6 +64,7 @@ function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitContext, setSubmitContext] = useState<"default" | "admin" | null>(null)
   const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -85,9 +86,14 @@ function LoginForm() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const nativeEvent = e.nativeEvent as SubmitEvent
+    const submitter = nativeEvent?.submitter as HTMLButtonElement | null
+    const adminMode = submitter?.dataset.mode === "admin"
+
     setIsSubmitting(true)
+    setSubmitContext(adminMode ? "admin" : "default")
     try {
       const callbackUrl = searchParams.get("callbackUrl") ?? undefined
       const result = await signIn("credentials", {
@@ -95,10 +101,15 @@ function LoginForm() {
         password,
         redirect: false,
         callbackUrl,
+        adminMode: adminMode ? "true" : "false",
       })
 
       if (!result || result.error) {
-        toast.error("Invalid email or password. Please try again.")
+        if (result?.error === "ADMIN_ONLY") {
+          toast.error(t("login.adminOnlyError"))
+        } else {
+          toast.error("Invalid email or password. Please try again.")
+        }
         return
       }
 
@@ -117,6 +128,7 @@ function LoginForm() {
       toast.error("Unable to sign in right now. Please try again later.")
     } finally {
       setIsSubmitting(false)
+      setSubmitContext(null)
     }
   }
 
@@ -175,11 +187,29 @@ function LoginForm() {
         </Link>
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? t("login.loading") : t("login.submit")}
+      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting} data-mode="default">
+        {isSubmitting && submitContext === "default" ? t("login.loading") : t("login.submit")}
       </Button>
 
-      
+      <div className="space-y-3 rounded-lg border border-dashed border-muted p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">{t("login.adminTitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("login.adminDescription")}</p>
+          </div>
+          <Badge variant="secondary">{t("login.adminBadge")}</Badge>
+        </div>
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          size="lg"
+          disabled={isSubmitting}
+          data-mode="admin"
+        >
+          {isSubmitting && submitContext === "admin" ? t("login.loading") : t("login.adminButton")}
+        </Button>
+      </div>
     </form>
   )
 }
