@@ -139,7 +139,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminPageProp
   const studentUniversityRaw = getParam(searchParams, "studentUniversity")
   const studentUniversity = normalizeSelectParam(studentUniversityRaw)
   const bookingStatusFilterRaw = getParam(searchParams, "bookingStatus")
-  const bookingStatusFilter = normalizeSelectParam(bookingStatusFilterRaw) as BookingStatus | undefined*** End Patch
+  const bookingStatusFilter = normalizeSelectParam(bookingStatusFilterRaw) as BookingStatus | undefined
 
   const filteredTeachers = pendingTeacherAccounts.filter((teacher) => {
     const matchesQuery =
