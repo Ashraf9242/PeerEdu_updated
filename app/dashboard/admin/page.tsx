@@ -714,7 +714,7 @@ function TeacherFilters({
       </div>
       <div className="space-y-2">
         <Label>{copy.filters.teachers.universityLabel}</Label>
-        <Select name="teacherUniversity" defaultValue={defaultUniversity}>
+        <Select name="teacherUniversity" defaultValue={defaultUniversity || undefined}>
           <SelectTrigger>
             <SelectValue placeholder={copy.filters.teachers.universityPlaceholder} />
           </SelectTrigger>
@@ -754,7 +754,7 @@ function StudentFilters({
       </div>
       <div className="space-y-2">
         <Label>{copy.filters.students.universityLabel}</Label>
-        <Select name="studentUniversity" defaultValue={defaultUniversity}>
+        <Select name="studentUniversity" defaultValue={defaultUniversity || undefined}>
           <SelectTrigger>
             <SelectValue placeholder={copy.filters.students.universityPlaceholder} />
           </SelectTrigger>
@@ -782,7 +782,7 @@ function BookingFilters({
   return (
     <form className="space-y-2" method="get">
       <Label>{copy.filters.bookings.statusLabel}</Label>
-      <Select name="bookingStatus" defaultValue={defaultStatus}>
+      <Select name="bookingStatus" defaultValue={defaultStatus || undefined}>
         <SelectTrigger>
           <SelectValue placeholder={copy.filters.bookings.allOption} />
         </SelectTrigger>
