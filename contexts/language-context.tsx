@@ -2,8 +2,10 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { LANGUAGE_COOKIE, LANGUAGE_COOKIE_MAX_AGE, isSupportedLanguage, resolveLanguage } from "@/lib/i18n"
+import type { SupportedLanguage } from "@/lib/i18n"
 
-type Language = "en" | "ar"
+type Language = SupportedLanguage
 
 interface LanguageContextType {
   language: Language
@@ -1104,17 +1106,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>("en")
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("peeredu-language") as Language
-    if (savedLanguage && (savedLanguage === "en" || savedLanguage === "ar")) {
-      setLanguage(savedLanguage)
-      document.documentElement.lang = savedLanguage
-      document.documentElement.dir = savedLanguage === "ar" ? "rtl" : "ltr"
-    }
+    const stored = localStorage.getItem(LANGUAGE_COOKIE)
+    const cookieLanguage = getCookieLanguage()
+    const nextLanguage = resolveLanguage(stored ?? cookieLanguage ?? undefined)
+    setLanguage(nextLanguage)
+    document.documentElement.lang = nextLanguage
+    document.documentElement.dir = nextLanguage === "ar" ? "rtl" : "ltr"
+    setLanguageCookie(nextLanguage)
   }, [])
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
-    localStorage.setItem("peeredu-language", lang)
+    localStorage.setItem(LANGUAGE_COOKIE, lang)
+    setLanguageCookie(lang)
     document.documentElement.lang = lang
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
   }
@@ -1128,6 +1132,22 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       {children}
     </LanguageContext.Provider>
   )
+}
+
+function getCookieLanguage(): Language | null {
+  if (typeof document === "undefined") return null
+  const match = document.cookie
+    .split(";")
+    .map((segment) => segment.trim())
+    .find((segment) => segment.startsWith(`${LANGUAGE_COOKIE}=`))
+  if (!match) return null
+  const value = match.split("=")[1]
+  return isSupportedLanguage(value) ? value : null
+}
+
+function setLanguageCookie(lang: Language) {
+  if (typeof document === "undefined") return
+  document.cookie = `${LANGUAGE_COOKIE}=${lang}; path=/; max-age=${LANGUAGE_COOKIE_MAX_AGE}`
 }
 
 export function useLanguage() {

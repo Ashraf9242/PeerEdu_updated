@@ -1,4 +1,5 @@
-import { formatDistanceToNow } from "date-fns"
+"use client"
+
 import { Activity } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -6,23 +7,39 @@ import { Badge } from "@/components/ui/badge"
 
 export type AuditEvent = {
   id: string
-  actor: string
   action: string
-  target?: string | null
-  createdAt: Date
+  summary: string
   severity?: "info" | "warning" | "critical"
 }
 
-export function AuditLogCard({ events }: { events: AuditEvent[] }) {
+interface AuditLogCardProps {
+  events: AuditEvent[]
+  title: string
+  description: string
+  emptyMessage: string
+  severityLabels?: {
+    info: string
+    warning: string
+    critical: string
+  }
+}
+
+export function AuditLogCard({
+  events,
+  title,
+  description,
+  emptyMessage,
+  severityLabels = { info: "info", warning: "warning", critical: "critical" },
+}: AuditLogCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Audit Trail</CardTitle>
-        <CardDescription>Latest admin actions across approvals, messaging, and automation.</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {events.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No recent actions recorded.</p>
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         ) : (
           <div className="space-y-3">
             {events.map((event) => (
@@ -35,14 +52,11 @@ export function AuditLogCard({ events }: { events: AuditEvent[] }) {
                     <p className="text-sm font-semibold text-foreground">{event.action}</p>
                     {event.severity && (
                       <Badge variant={event.severity === "critical" ? "destructive" : "secondary"} className="text-xs">
-                        {event.severity}
+                        {severityLabels[event.severity]}
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    by {event.actor}
-                    {event.target ? ` · ${event.target}` : ""} · {formatDistanceToNow(event.createdAt, { addSuffix: true })}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{event.summary}</p>
                 </div>
               </div>
             ))}

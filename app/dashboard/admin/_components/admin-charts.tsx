@@ -27,15 +27,23 @@ interface AdminChartsProps {
   userGrowthData: UserGrowthDatum[]
   bookingStatusData: BookingStatusDatum[]
   revenueTrendData: RevenueTrendDatum[]
+  copy: {
+    userGrowthTitle: string
+    userGrowthDescription: string
+    bookingsTitle: string
+    bookingsDescription: string
+    revenueTitle: string
+    revenueDescription: string
+  }
 }
 
-export function AdminCharts({ userGrowthData, bookingStatusData, revenueTrendData }: AdminChartsProps) {
+export function AdminCharts({ userGrowthData, bookingStatusData, revenueTrendData, copy }: AdminChartsProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>User Growth (30 days)</CardTitle>
-          <CardDescription>Daily activated accounts across students, teachers, and admins.</CardDescription>
+          <CardTitle>{copy.userGrowthTitle}</CardTitle>
+          <CardDescription>{copy.userGrowthDescription}</CardDescription>
         </CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -52,8 +60,8 @@ export function AdminCharts({ userGrowthData, bookingStatusData, revenueTrendDat
 
       <Card>
         <CardHeader>
-          <CardTitle>Bookings by Status</CardTitle>
-          <CardDescription>Distribution for the last 30 days.</CardDescription>
+          <CardTitle>{copy.bookingsTitle}</CardTitle>
+          <CardDescription>{copy.bookingsDescription}</CardDescription>
         </CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -78,8 +86,8 @@ export function AdminCharts({ userGrowthData, bookingStatusData, revenueTrendDat
 
       <Card className="lg:col-span-3">
         <CardHeader>
-          <CardTitle>Revenue Trend</CardTitle>
-          <CardDescription>Daily confirmed/completed booking revenue (OMR).</CardDescription>
+          <CardTitle>{copy.revenueTitle}</CardTitle>
+          <CardDescription>{copy.revenueDescription}</CardDescription>
         </CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
